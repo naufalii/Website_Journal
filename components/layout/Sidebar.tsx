@@ -12,7 +12,6 @@ import {
   FileText,
   FolderLock,
   Settings,
-  Sparkles,
   PlusCircle,
   Download,
   LogIn,
@@ -44,12 +43,14 @@ export function Sidebar() {
 
   return (
     <aside className="hidden md:flex flex-col w-64 border-r border-slate-200/60 dark:border-white/5 bg-surface-light dark:bg-surface-dark h-screen sticky top-0 z-30 select-none transition-colors duration-200">
-      {/* Brand / Logo */}
+      {/* Brand / Logo with official icon asset */}
       <div className="p-6 border-b border-slate-100 dark:border-white/5 flex items-center justify-between">
         <Link href="/" className="flex items-center gap-3 group">
-          <div className="h-10 w-10 rounded-2xl bg-gradient-to-tr from-brand-primary via-brand-vibrant to-brand-cyan flex items-center justify-center text-white shadow-soft group-hover:scale-105 transition-transform duration-200">
-            <Sparkles className="h-5 w-5" />
-          </div>
+          <img
+            src="/icons/icon-192x192.png"
+            alt="Nexus Logo"
+            className="w-10 h-10 rounded-2xl object-contain shadow-soft group-hover:scale-105 transition-transform duration-200"
+          />
           <div>
             <h1 className="font-black text-sm text-content-primaryLight dark:text-content-primaryDark tracking-tight">
               NexusWorkspace

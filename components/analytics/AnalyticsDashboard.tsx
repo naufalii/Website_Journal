@@ -13,24 +13,18 @@ import {
   Pie,
   Cell,
   Legend,
-  BarChart,
-  Bar,
 } from 'recharts';
 import {
   TrendingUp,
   Flame,
   Clock,
   Target,
-  CheckCircle2,
-  Calendar,
-  Sparkles,
   Award,
 } from 'lucide-react';
-import { getLocalDateString, calculateStreak, formatShortDate } from '@/lib/utils';
-import { Badge } from '@/components/ui/Badge';
+import { getLocalDateString, calculateStreak } from '@/lib/utils';
 
 export function AnalyticsDashboard() {
-  const { goals, schedules, courses, notes } = useApp();
+  const { goals, schedules } = useApp();
   const todayStr = getLocalDateString();
 
   // -------------------------------------------------------------
@@ -66,7 +60,7 @@ export function AnalyticsDashboard() {
   // -------------------------------------------------------------
   const streakStats = useMemo(() => {
     if (goals.length === 0) {
-      return { maxStreak: 0, currentStreak: 0, consistencyRate: 0, activeDays: 0 };
+      return { maxStreak: 0, currentStreak: 0, consistencyRate: 0, activeDays: 0, last14Days: [] };
     }
 
     let maxStreak = 0;
@@ -128,8 +122,8 @@ export function AnalyticsDashboard() {
       work: 'Kerja & Tugas',
       study: 'Belajar & Skill',
       meeting: 'Meeting & Diskusi',
-      health: 'Kesehatan & Olahraga',
-      personal: 'Personal & Hobi',
+      health: 'Kesehatan',
+      personal: 'Personal',
       other: 'Lainnya',
     };
 
@@ -184,7 +178,7 @@ export function AnalyticsDashboard() {
               {streakStats.maxStreak} Hari 🔥
             </h3>
             <p className="text-[11px] text-content-mutedLight dark:text-content-mutedDark">
-              Rata-rata konsistensi: {streakStats.consistencyRate}%
+              Konsistensi: {streakStats.consistencyRate}%
             </p>
           </div>
         </div>
@@ -221,22 +215,20 @@ export function AnalyticsDashboard() {
       </div>
 
       {/* Grid 2 Visual Analytics Charts */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
         {/* Goal Completion Rate Chart */}
-        <div className="p-6 rounded-3xl bg-surface-light dark:bg-surface-dark border border-slate-100 dark:border-white/5 shadow-soft space-y-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <h3 className="text-sm font-bold text-content-primaryLight dark:text-content-primaryDark flex items-center gap-2">
-                <Target className="h-4 w-4 text-brand-primary dark:text-brand-vibrant" />
-                <span>Pencapaian Target 7 Hari Terakhir</span>
-              </h3>
-              <p className="text-xs text-content-mutedLight dark:text-content-mutedDark mt-0.5">
-                Tingkat keberhasilan pemenuhan target harian (%)
-              </p>
-            </div>
+        <div className="p-5 sm:p-6 rounded-3xl bg-surface-light dark:bg-surface-dark border border-slate-100 dark:border-white/5 shadow-soft space-y-4">
+          <div>
+            <h3 className="text-sm font-bold text-content-primaryLight dark:text-content-primaryDark flex items-center gap-2">
+              <Target className="h-4 w-4 text-brand-primary dark:text-brand-vibrant" />
+              <span>Pencapaian Target 7 Hari Terakhir</span>
+            </h3>
+            <p className="text-xs text-content-mutedLight dark:text-content-mutedDark mt-0.5">
+              Tingkat keberhasilan pemenuhan target harian (%)
+            </p>
           </div>
 
-          <div className="h-64 w-full pt-4">
+          <div className="w-full h-[260px] min-h-[260px] sm:h-[300px]">
             <ResponsiveContainer width="100%" height="100%">
               <AreaChart data={weeklyGoalsData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                 <defs>
@@ -290,28 +282,26 @@ export function AnalyticsDashboard() {
         </div>
 
         {/* Time Distribution Donut Chart */}
-        <div className="p-6 rounded-3xl bg-surface-light dark:bg-surface-dark border border-slate-100 dark:border-white/5 shadow-soft space-y-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <h3 className="text-sm font-bold text-content-primaryLight dark:text-content-primaryDark flex items-center gap-2">
-                <Clock className="h-4 w-4 text-brand-cyan" />
-                <span>Distribusi Waktu Berdasarkan Kategori</span>
-              </h3>
-              <p className="text-xs text-content-mutedLight dark:text-content-mutedDark mt-0.5">
-                Alokasi durasi jam aktivitas pada timeline agenda
-              </p>
-            </div>
+        <div className="p-5 sm:p-6 rounded-3xl bg-surface-light dark:bg-surface-dark border border-slate-100 dark:border-white/5 shadow-soft space-y-4">
+          <div>
+            <h3 className="text-sm font-bold text-content-primaryLight dark:text-content-primaryDark flex items-center gap-2">
+              <Clock className="h-4 w-4 text-brand-cyan" />
+              <span>Distribusi Waktu Berdasarkan Kategori</span>
+            </h3>
+            <p className="text-xs text-content-mutedLight dark:text-content-mutedDark mt-0.5">
+              Alokasi durasi jam aktivitas pada timeline agenda
+            </p>
           </div>
 
-          <div className="h-64 w-full flex items-center justify-center">
+          <div className="w-full h-[260px] min-h-[260px] sm:h-[300px] flex items-center justify-center">
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
                 <Pie
                   data={timeDistributionData}
                   cx="50%"
-                  cy="50%"
-                  innerRadius={60}
-                  outerRadius={85}
+                  cy="45%"
+                  innerRadius={55}
+                  outerRadius={80}
                   paddingAngle={5}
                   dataKey="value"
                 >
@@ -339,7 +329,7 @@ export function AnalyticsDashboard() {
                   verticalAlign="bottom"
                   height={36}
                   formatter={(value) => (
-                    <span className="text-xs font-bold text-content-primaryLight dark:text-content-primaryDark">
+                    <span className="text-[11px] sm:text-xs font-bold text-content-primaryLight dark:text-content-primaryDark">
                       {value}
                     </span>
                   )}
@@ -351,7 +341,7 @@ export function AnalyticsDashboard() {
       </div>
 
       {/* Consistency Rhythm & 14-Day Dot Grid */}
-      <div className="p-6 rounded-3xl bg-surface-light dark:bg-surface-dark border border-slate-100 dark:border-white/5 shadow-soft space-y-4">
+      <div className="p-5 sm:p-6 rounded-3xl bg-surface-light dark:bg-surface-dark border border-slate-100 dark:border-white/5 shadow-soft space-y-4">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
           <div>
             <h3 className="text-sm font-bold text-content-primaryLight dark:text-content-primaryDark flex items-center gap-2">
@@ -359,7 +349,7 @@ export function AnalyticsDashboard() {
               <span>Matriks Konsistensi 14 Hari Terakhir</span>
             </h3>
             <p className="text-xs text-content-mutedLight dark:text-content-mutedDark mt-0.5">
-              Setiap lingkaran mewakili hari dengan target harian yang berhasil diselesaikan.
+              Setiap kotak mewakili hari dengan target harian yang berhasil diselesaikan.
             </p>
           </div>
 
@@ -372,11 +362,11 @@ export function AnalyticsDashboard() {
         </div>
 
         {/* 14-Day Visual Dots */}
-        <div className="grid grid-cols-7 sm:grid-cols-14 gap-2.5 pt-2">
+        <div className="grid grid-cols-7 sm:grid-cols-14 gap-2 pt-2">
           {streakStats.last14Days?.map((dot) => (
             <div
               key={dot.dateStr}
-              className={`p-3 rounded-2xl flex flex-col items-center justify-center transition-all ${
+              className={`p-2.5 sm:p-3 rounded-2xl flex flex-col items-center justify-center transition-all ${
                 dot.active
                   ? 'bg-brand-primary text-white shadow-soft font-bold scale-105'
                   : 'bg-surface-lightPill dark:bg-surface-darkPill text-content-mutedLight dark:text-content-mutedDark'

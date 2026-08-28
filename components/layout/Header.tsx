@@ -3,14 +3,12 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { PlusCircle, Clock, Sun, Moon, Search, Command as CommandIcon } from 'lucide-react';
-import { useApp } from '@/context/AppContext';
+import { Clock, Sun, Moon } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { useTheme } from '@/context/ThemeContext';
 
 export function Header() {
   const pathname = usePathname();
-  const { openQuickAction } = useApp();
   const { user } = useAuth();
   const { theme, toggleTheme } = useTheme();
 
@@ -32,10 +30,6 @@ export function Header() {
     return () => clearInterval(interval);
   }, []);
 
-  const triggerCommandPalette = () => {
-    window.dispatchEvent(new KeyboardEvent('keydown', { key: 'k', metaKey: true, ctrlKey: true }));
-  };
-
   const pageTitles: Record<string, { title: string; subtitle: string }> = {
     '/': { title: 'Dashboard', subtitle: 'Pusat produktivitas & progres harian' },
     '/analytics': { title: 'Analytics & Insight', subtitle: 'Grafik performa, streak, dan distribusi waktu' },
@@ -56,7 +50,7 @@ export function Header() {
 
   return (
     <header className="sticky top-0 z-20 border-b border-slate-200/60 dark:border-white/5 bg-surface-light/80 dark:bg-surface-dark/80 backdrop-blur-xl px-4 sm:px-6 lg:px-8 py-3.5 flex items-center justify-between transition-colors duration-200">
-      {/* Title & Path */}
+      {/* Title & Subtitle */}
       <div>
         <h2 className="text-base sm:text-lg font-black text-content-primaryLight dark:text-content-primaryDark tracking-tight">
           {currentInfo.title}
@@ -66,23 +60,10 @@ export function Header() {
         </p>
       </div>
 
-      {/* Right controls: Command Palette Search, Theme Switcher, Live Clock, User Avatar, & Quick Action */}
-      <div className="flex items-center gap-2 sm:gap-3">
-        {/* Command Palette Trigger */}
-        <button
-          onClick={triggerCommandPalette}
-          className="flex items-center gap-2 px-3 py-2 rounded-2xl bg-surface-lightPill dark:bg-surface-darkPill hover:bg-slate-200 dark:hover:bg-slate-700/50 text-content-mutedLight dark:text-content-mutedDark text-xs font-medium transition-colors"
-          title="Buka Command Palette (Ctrl+K)"
-        >
-          <Search className="h-3.5 w-3.5 text-brand-primary dark:text-brand-vibrant" />
-          <span className="hidden sm:inline">Cari...</span>
-          <span className="hidden md:inline-flex items-center gap-0.5 text-[10px] bg-white dark:bg-surface-dark px-1.5 py-0.5 rounded-md border border-slate-200 dark:border-white/10 font-mono">
-            ⌘K
-          </span>
-        </button>
-
+      {/* Right controls: Live Clock, Theme Switcher, and User Profile */}
+      <div className="flex items-center gap-2.5 sm:gap-3.5">
         {/* Live Clock Widget */}
-        <div className="hidden lg:flex items-center gap-2 px-3 py-1.5 rounded-2xl bg-surface-lightPill dark:bg-surface-darkPill text-xs text-content-mutedLight dark:text-content-mutedDark font-medium">
+        <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-2xl bg-surface-lightPill dark:bg-surface-darkPill text-xs text-content-mutedLight dark:text-content-mutedDark font-medium">
           <Clock className="h-3.5 w-3.5 text-brand-primary dark:text-brand-vibrant" />
           <span className="font-mono font-bold text-content-primaryLight dark:text-content-primaryDark">
             {timeStr || '--:--'}
@@ -125,16 +106,6 @@ export function Header() {
             Masuk
           </Link>
         )}
-
-        {/* Global Quick Action button */}
-        <button
-          onClick={() => openQuickAction()}
-          className="flex items-center gap-1.5 px-3.5 py-2 rounded-2xl bg-brand-primary hover:bg-brand-deep active:scale-95 text-white text-xs font-bold shadow-soft hover:shadow-glow transition-all duration-200"
-        >
-          <PlusCircle className="h-4 w-4" />
-          <span className="hidden sm:inline">Tambah Cepat</span>
-          <span className="sm:hidden">Tambah</span>
-        </button>
       </div>
     </header>
   );
