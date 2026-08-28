@@ -3,11 +3,10 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { PlusCircle, Clock, Sun, Moon, Sparkles } from 'lucide-react';
+import { PlusCircle, Clock, Sun, Moon, Search, Command as CommandIcon } from 'lucide-react';
 import { useApp } from '@/context/AppContext';
 import { useAuth } from '@/context/AuthContext';
 import { useTheme } from '@/context/ThemeContext';
-import { formatDateIndo } from '@/lib/utils';
 
 export function Header() {
   const pathname = usePathname();
@@ -16,7 +15,6 @@ export function Header() {
   const { theme, toggleTheme } = useTheme();
 
   const [timeStr, setTimeStr] = useState<string>('');
-  const [todayDate, setTodayDate] = useState<string>('');
 
   useEffect(() => {
     const updateTime = () => {
@@ -27,10 +25,6 @@ export function Header() {
           minute: '2-digit',
         })
       );
-      const year = now.getFullYear();
-      const month = String(now.getMonth() + 1).padStart(2, '0');
-      const day = String(now.getDate()).padStart(2, '0');
-      setTodayDate(`${year}-${month}-${day}`);
     };
 
     updateTime();
@@ -38,8 +32,13 @@ export function Header() {
     return () => clearInterval(interval);
   }, []);
 
+  const triggerCommandPalette = () => {
+    window.dispatchEvent(new KeyboardEvent('keydown', { key: 'k', metaKey: true, ctrlKey: true }));
+  };
+
   const pageTitles: Record<string, { title: string; subtitle: string }> = {
     '/': { title: 'Dashboard', subtitle: 'Pusat produktivitas & progres harian' },
+    '/analytics': { title: 'Analytics & Insight', subtitle: 'Grafik performa, streak, dan distribusi waktu' },
     '/goals': { title: 'Daily Goals', subtitle: 'Bangun konsistensi dan pantau pencapaian rutin' },
     '/schedule': { title: 'Jadwal & Agenda', subtitle: 'Manajemen waktu dan timeline aktivitas' },
     '/courses': { title: 'Course & Skill', subtitle: 'Pelacak materi belajar dan kurikulum skill' },
@@ -67,8 +66,21 @@ export function Header() {
         </p>
       </div>
 
-      {/* Right controls: Theme Switcher, Live Clock, User Avatar, & Quick Action */}
-      <div className="flex items-center gap-2.5 sm:gap-3.5">
+      {/* Right controls: Command Palette Search, Theme Switcher, Live Clock, User Avatar, & Quick Action */}
+      <div className="flex items-center gap-2 sm:gap-3">
+        {/* Command Palette Trigger */}
+        <button
+          onClick={triggerCommandPalette}
+          className="flex items-center gap-2 px-3 py-2 rounded-2xl bg-surface-lightPill dark:bg-surface-darkPill hover:bg-slate-200 dark:hover:bg-slate-700/50 text-content-mutedLight dark:text-content-mutedDark text-xs font-medium transition-colors"
+          title="Buka Command Palette (Ctrl+K)"
+        >
+          <Search className="h-3.5 w-3.5 text-brand-primary dark:text-brand-vibrant" />
+          <span className="hidden sm:inline">Cari...</span>
+          <span className="hidden md:inline-flex items-center gap-0.5 text-[10px] bg-white dark:bg-surface-dark px-1.5 py-0.5 rounded-md border border-slate-200 dark:border-white/10 font-mono">
+            ⌘K
+          </span>
+        </button>
+
         {/* Live Clock Widget */}
         <div className="hidden lg:flex items-center gap-2 px-3 py-1.5 rounded-2xl bg-surface-lightPill dark:bg-surface-darkPill text-xs text-content-mutedLight dark:text-content-mutedDark font-medium">
           <Clock className="h-3.5 w-3.5 text-brand-primary dark:text-brand-vibrant" />

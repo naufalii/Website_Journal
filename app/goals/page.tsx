@@ -10,6 +10,8 @@ import {
   Circle,
   Edit2,
   Trash2,
+  Copy,
+  Sparkles,
 } from 'lucide-react';
 import { Goal } from '@/lib/types';
 import { getLocalDateString, calculateStreak } from '@/lib/utils';
@@ -22,7 +24,7 @@ import { GoalModal } from '@/components/goals/GoalModal';
 import { ConfirmDialog } from '@/components/shared/ConfirmDialog';
 
 export default function GoalsPage() {
-  const { goals, toggleGoalDate, deleteGoal } = useApp();
+  const { goals, toggleGoalDate, deleteGoal, showToast } = useApp();
 
   const [selectedDate, setSelectedDate] = useState(getLocalDateString());
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
@@ -40,6 +42,30 @@ export default function GoalsPage() {
   const totalCount = filteredGoals.length;
   const completedCount = filteredGoals.filter((g) => g.completedDates.includes(selectedDate)).length;
   const progressPercent = totalCount > 0 ? Math.round((completedCount / totalCount) * 100) : 0;
+
+  // Copy yesterday's completions to selected date
+  const copyYesterdayCompletions = () => {
+    const [y, m, d] = selectedDate.split('-').map(Number);
+    const prevDate = new Date(y, m - 1, d);
+    prevDate.setDate(prevDate.getDate() - 1);
+    const prevDateStr = getLocalDateString(prevDate);
+
+    let copiedCount = 0;
+    goals.forEach((goal) => {
+      const wasCompletedYesterday = goal.completedDates.includes(prevDateStr);
+      const isAlreadyCompletedToday = goal.completedDates.includes(selectedDate);
+      if (wasCompletedYesterday && !isAlreadyCompletedToday) {
+        toggleGoalDate(goal.id, selectedDate);
+        copiedCount++;
+      }
+    });
+
+    if (copiedCount > 0) {
+      showToast('Target Tersalin', `${copiedCount} target dari kemarin berhasil disalin ke tanggal ini.`);
+    } else {
+      showToast('Informasi', 'Tidak ada target selesai dari kemarin yang perlu disalin.', 'info');
+    }
+  };
 
   const categories = [
     { id: 'all', label: 'Semua Kategori' },
@@ -65,16 +91,31 @@ export default function GoalsPage() {
           </p>
         </div>
 
-        <Button
-          onClick={() => {
-            setEditingGoal(null);
-            setModalOpen(true);
-          }}
-          className="shadow-glow"
-        >
-          <Plus className="h-4 w-4" />
-          <span>Tambah Target</span>
-        </Button>
+        <div className="flex items-center gap-2">
+          {goals.length > 0 && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={copyYesterdayCompletions}
+              className="gap-1.5 text-xs font-bold"
+              title="Salin checklist yang terselesaikan kemarin ke hari ini"
+            >
+              <Copy className="h-3.5 w-3.5 text-brand-cyan" />
+              <span>Salin dari Kemarin</span>
+            </Button>
+          )}
+
+          <Button
+            onClick={() => {
+              setEditingGoal(null);
+              setModalOpen(true);
+            }}
+            className="shadow-glow"
+          >
+            <Plus className="h-4 w-4" />
+            <span>Tambah Target</span>
+          </Button>
+        </div>
       </div>
 
       {/* Horizontal 7-Day Calendar Strip */}

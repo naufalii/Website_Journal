@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import {
   LayoutDashboard,
+  BarChart3,
   Target,
   Calendar,
   GraduationCap,
@@ -23,6 +24,7 @@ import { useAuth } from '@/context/AuthContext';
 
 const NAV_ITEMS = [
   { label: 'Dashboard', href: '/', icon: LayoutDashboard },
+  { label: 'Analytics', href: '/analytics', icon: BarChart3 },
   { label: 'Daily Goals', href: '/goals', icon: Target },
   { label: 'Jadwal & Agenda', href: '/schedule', icon: Calendar },
   { label: 'Course & Skill', href: '/courses', icon: GraduationCap },

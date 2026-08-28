@@ -6,6 +6,7 @@ import { AppProvider } from '@/context/AppContext';
 import { Sidebar } from '@/components/layout/Sidebar';
 import { Header } from '@/components/layout/Header';
 import { MobileNav } from '@/components/layout/MobileNav';
+import { CommandPalette } from '@/components/layout/CommandPalette';
 import { QuickActionModal } from '@/components/shared/QuickActionModal';
 import { ToastContainer } from '@/components/ui/Toast';
 
@@ -54,6 +55,9 @@ export default function RootLayout({
                   </main>
                 </div>
               </div>
+
+              {/* Global Command Palette (Ctrl+K / Cmd+K) */}
+              <CommandPalette />
 
               {/* Mobile Floating Bottom Navigation */}
               <MobileNav />

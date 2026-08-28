@@ -13,6 +13,8 @@ import {
   Edit2,
   Trash2,
   Filter,
+  List,
+  AlignVerticalSpaceAround,
 } from 'lucide-react';
 import { ScheduleItem } from '@/lib/types';
 import { getLocalDateString, formatShortDate } from '@/lib/utils';
@@ -20,6 +22,7 @@ import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { HorizontalDateStrip } from '@/components/dashboard/HorizontalDateStrip';
+import { VerticalTimeline } from '@/components/schedule/VerticalTimeline';
 import { ScheduleModal } from '@/components/schedule/ScheduleModal';
 import { ConfirmDialog } from '@/components/shared/ConfirmDialog';
 
@@ -28,6 +31,7 @@ export default function SchedulePage() {
 
   const [selectedDate, setSelectedDate] = useState<string>(getLocalDateString());
   const [priorityFilter, setPriorityFilter] = useState<string>('all');
+  const [viewMode, setViewMode] = useState<'list' | 'timeline'>('timeline');
   const [modalOpen, setModalOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<ScheduleItem | null>(null);
   const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null);
@@ -66,20 +70,50 @@ export default function SchedulePage() {
             <span>Jadwal & Agenda Planner</span>
           </h1>
           <p className="text-xs sm:text-sm text-content-mutedLight dark:text-content-mutedDark mt-1">
-            Rencanakan timeline aktivitas, alokasi waktu, dan pertemuan penting.
+            Rencanakan timeline aktivitas, alokasi waktu, dan jeda waktu luang produktif.
           </p>
         </div>
 
-        <Button
-          onClick={() => {
-            setEditingItem(null);
-            setModalOpen(true);
-          }}
-          className="shadow-glow"
-        >
-          <Plus className="h-4 w-4" />
-          <span>Tambah Agenda</span>
-        </Button>
+        <div className="flex items-center gap-2">
+          {/* View Mode Switcher */}
+          <div className="flex items-center gap-1 p-1 rounded-2xl bg-surface-light dark:bg-surface-dark border border-slate-100 dark:border-white/5 shadow-soft">
+            <button
+              onClick={() => setViewMode('timeline')}
+              className={`p-2 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all ${
+                viewMode === 'timeline'
+                  ? 'bg-brand-primary text-white shadow-soft'
+                  : 'text-content-mutedLight dark:text-content-mutedDark hover:text-content-primaryLight'
+              }`}
+              title="Tampilan Timeline Vertikal"
+            >
+              <AlignVerticalSpaceAround className="h-4 w-4" />
+              <span className="hidden sm:inline">Timeline</span>
+            </button>
+            <button
+              onClick={() => setViewMode('list')}
+              className={`p-2 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all ${
+                viewMode === 'list'
+                  ? 'bg-brand-primary text-white shadow-soft'
+                  : 'text-content-mutedLight dark:text-content-mutedDark hover:text-content-primaryLight'
+              }`}
+              title="Tampilan Kartu"
+            >
+              <List className="h-4 w-4" />
+              <span className="hidden sm:inline">Kartu</span>
+            </button>
+          </div>
+
+          <Button
+            onClick={() => {
+              setEditingItem(null);
+              setModalOpen(true);
+            }}
+            className="shadow-glow"
+          >
+            <Plus className="h-4 w-4" />
+            <span>Tambah Agenda</span>
+          </Button>
+        </div>
       </div>
 
       {/* Horizontal 7-Day Date Strip */}
@@ -110,7 +144,7 @@ export default function SchedulePage() {
         </div>
       </div>
 
-      {/* Agenda Timeline List */}
+      {/* Agenda Content: Timeline or Card List */}
       {filteredSchedules.length === 0 ? (
         <EmptyState
           icon={<CalendarIcon className="h-8 w-8" />}
@@ -122,6 +156,17 @@ export default function SchedulePage() {
             setModalOpen(true);
           }}
         />
+      ) : viewMode === 'timeline' ? (
+        <div className="p-6 rounded-3xl bg-surface-light dark:bg-surface-dark border border-slate-100 dark:border-white/5 shadow-soft">
+          <VerticalTimeline
+            schedules={filteredSchedules}
+            onToggleComplete={toggleScheduleComplete}
+            onEdit={(item) => {
+              setEditingItem(item);
+              setModalOpen(true);
+            }}
+          />
+        </div>
       ) : (
         <div className="space-y-3">
           {filteredSchedules.map((item) => (

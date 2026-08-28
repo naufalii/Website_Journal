@@ -367,21 +367,37 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       const currentGoal = goals.find((g) => g.id === id);
       if (!currentGoal) return;
 
-      const exists = currentGoal.completedDates.includes(targetDate);
+      const previousDates = currentGoal.completedDates;
+      const exists = previousDates.includes(targetDate);
       const nextDates = exists
-        ? currentGoal.completedDates.filter((d) => d !== targetDate)
-        : [...currentGoal.completedDates, targetDate];
+        ? previousDates.filter((d) => d !== targetDate)
+        : [...previousDates, targetDate];
 
-      // Optimistic update
+      // Optimistic Instant Update (0ms)
       setGoals((prev) =>
         prev.map((g) => (g.id === id ? { ...g, completedDates: nextDates } : g))
       );
 
       if (isConfigured && user) {
-        await supabase
-          .from('goals')
-          .update({ completed_dates: nextDates })
-          .eq('id', id);
+        try {
+          const { error } = await supabase
+            .from('goals')
+            .update({ completed_dates: nextDates })
+            .eq('id', id);
+
+          if (error) {
+            // Auto rollback on failure
+            setGoals((prev) =>
+              prev.map((g) => (g.id === id ? { ...g, completedDates: previousDates } : g))
+            );
+            showToast('Koneksi Terganggu', 'Perubahan target dikembalikan karena kendala jaringan.', 'error');
+          }
+        } catch (err: any) {
+          setGoals((prev) =>
+            prev.map((g) => (g.id === id ? { ...g, completedDates: previousDates } : g))
+          );
+          showToast('Koneksi Terganggu', err?.message || 'Gagal menyinkronkan data.', 'error');
+        }
       } else {
         setLocalItem(
           STORAGE_KEYS.GOALS,
@@ -389,7 +405,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         );
       }
     },
-    [goals, isConfigured, user]
+    [goals, isConfigured, user, showToast]
   );
 
   // -------------------------------------------------------------
@@ -512,15 +528,34 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     async (id: string) => {
       const current = schedules.find((s) => s.id === id);
       if (!current) return;
-      const nextCompleted = !current.completed;
+      const previousCompleted = current.completed;
+      const nextCompleted = !previousCompleted;
 
-      // Optimistic update
+      // Optimistic Instant Update (0ms)
       setSchedules((prev) =>
         prev.map((item) => (item.id === id ? { ...item, completed: nextCompleted } : item))
       );
 
       if (isConfigured && user) {
-        await supabase.from('schedules').update({ completed: nextCompleted }).eq('id', id);
+        try {
+          const { error } = await supabase
+            .from('schedules')
+            .update({ completed: nextCompleted })
+            .eq('id', id);
+
+          if (error) {
+            // Auto rollback on failure
+            setSchedules((prev) =>
+              prev.map((item) => (item.id === id ? { ...item, completed: previousCompleted } : item))
+            );
+            showToast('Koneksi Terganggu', 'Perubahan agenda dikembalikan karena kendala jaringan.', 'error');
+          }
+        } catch (err: any) {
+          setSchedules((prev) =>
+            prev.map((item) => (item.id === id ? { ...item, completed: previousCompleted } : item))
+          );
+          showToast('Koneksi Terganggu', err?.message || 'Gagal menyinkronkan data.', 'error');
+        }
       } else {
         setLocalItem(
           STORAGE_KEYS.SCHEDULES,
@@ -528,7 +563,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         );
       }
     },
-    [schedules, isConfigured, user]
+    [schedules, isConfigured, user, showToast]
   );
 
   // -------------------------------------------------------------
