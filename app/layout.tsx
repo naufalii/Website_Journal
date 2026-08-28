@@ -1,4 +1,4 @@
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import './globals.css';
 import { AuthProvider } from '@/context/AuthContext';
 import { AppProvider } from '@/context/AppContext';
@@ -8,9 +8,26 @@ import { MobileNav } from '@/components/layout/MobileNav';
 import { QuickActionModal } from '@/components/shared/QuickActionModal';
 import { ToastContainer } from '@/components/ui/Toast';
 
+export const viewport: Viewport = {
+  themeColor: '#09090b',
+  width: 'device-width',
+  initialScale: 1,
+  userScalable: false,
+};
+
 export const metadata: Metadata = {
   title: 'NexusWorkspace | All-in-One Personal Workspace & Productivity Dashboard',
   description: 'Ruang kerja digital & dashboard produktivitas pribadi: Goals, Jadwal, Kursus, Catatan, dan Resource Vault tersinkronisasi multi-device dengan Supabase.',
+  applicationName: 'Nexus Workspace',
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: 'black-translucent',
+    title: 'Nexus',
+  },
+  icons: {
+    apple: '/icons/apple-touch-icon.png',
+    icon: '/icons/icon-192x192.png',
+  },
 };
 
 export default function RootLayout({
