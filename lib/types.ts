@@ -66,7 +66,8 @@ export interface VaultItem {
   title: string;
   type: VaultType;
   category: VaultCategory;
-  url?: string; // For links
+  url?: string; // For links or storage public URL
+  filePath?: string; // Supabase Storage bucket object path
   fileName?: string; // For files
   fileSize?: number; // In bytes
   fileType?: string; // MIME type

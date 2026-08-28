@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { GreetingBanner } from '@/components/dashboard/GreetingBanner';
+import { SupabaseSetupBanner } from '@/components/shared/SupabaseSetupBanner';
 import { StatCards } from '@/components/dashboard/StatCards';
 import { TodayGoalsWidget } from '@/components/dashboard/TodayGoalsWidget';
 import { TodayScheduleWidget } from '@/components/dashboard/TodayScheduleWidget';
@@ -11,6 +12,9 @@ import { RecentNotesWidget } from '@/components/dashboard/RecentNotesWidget';
 export default function DashboardPage() {
   return (
     <div className="space-y-6 sm:space-y-8 animate-in fade-in duration-300">
+      {/* Supabase Connection / Auth Banner */}
+      <SupabaseSetupBanner />
+
       {/* Dynamic Greeting & Live Banner */}
       <GreetingBanner />
 

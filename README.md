@@ -1,159 +1,125 @@
 # NexusWorkspace — All-in-One Personal Workspace & Productivity Dashboard
 
-Aplikasi web modern, terstruktur, responsif, dan siap dideploy 100% ke **Vercel** untuk manajemen produktivitas harian Anda.
+Aplikasi web modern, terstruktur, responsif, dan siap dideploy 100% ke **Vercel** dengan sinkronisasi multi-device (Laptop, Tablet & Smartphone/HP) menggunakan **Supabase** (Auth, PostgreSQL DB + RLS, dan Supabase Storage).
 
 ![Next.js](https://img.shields.io/badge/Next.js-14-black)
 ![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-3.4-38B2AC)
-![TypeScript](https://img.shields.io/badge/TypeScript-5.4-blue)
+![Supabase](https://img.shields.io/badge/Supabase-Auth_&_DB_&_Storage-3ECF8E)
 ![Vercel Ready](https://img.shields.io/badge/Vercel-100%25_Ready-success)
 
 ---
 
-## 🌟 Fitur & Modul Utama
+## 🌟 Fitur Utama & Multi-Device Sync
 
-1. **Dashboard Overview (Home)**
-   - Header dinamis: Jam digital real-time & salam kontekstual (Pagi/Siang/Sore/Malam).
-   - Stat Cards: Rangkuman progres target hari ini, streak konsistensi, jumlah agenda, dan kursus aktif.
-   - Quick Action Modal (+ Tambah Cepat) di header & sidebar yang dapat diakses dari halaman mana saja.
-   - Widgets terintegrasi: Checklist target hari ini, timeline agenda hari ini, progres kursus aktif, dan catatan terbaru.
+1. **Sinkronisasi Otomatis Antar Perangkat (Laptop & HP)**
+   - Semua target, jadwal, kursus, catatan, dan berkas diunggah langsung ke database **Supabase Cloud**.
+   - Buka dashboard dari laptop di kantor, lalu buka dari browser HP saat di jalan — semua data tersinkronisasi instan.
 
-2. **Daily Goals & Habit Tracker (`/goals`)**
-   - Checklist target & kebiasaan harian interaktif.
-   - Perhitungan persentase progres harian otomatis.
-   - Visualisasi **Streak Counter** (menghitung hari berturut-turut checklist target tercapai).
-   - Navigasi tanggal (Hari Ini, Kemarin, Besok, Kalender).
-   - Filter berdasarkan kategori (Karir, Belajar, Kesehatan, Finansial, Personal, Umum).
+2. **Sistem Autentikasi Terisolasi (Supabase Auth & RLS)**
+   - Login & registrasi aman (`/login`).
+   - Setiap pengguna memiliki ruang kerja privat. Row Level Security (RLS) di PostgreSQL memastikan data Anda hanya bisa diakses oleh akun Anda sendiri.
 
-3. **Schedule & Agenda Planner (`/schedule`)**
-   - Form agenda: Nama aktivitas, Tanggal, Jam (Mulai - Selesai), Kategori, dan Skala Prioritas (High 🔴, Medium 🟡, Low 🟢).
-   - Timeline list terurut secara kronologis waktu terdekat.
-   - Filter waktu: Hari Ini, Besok, 7 Hari ke Depan, dan Semua Jadwal.
-   - Status toggle (Selesai / Belum Selesai) & tautan lokasi/meeting online yang dapat diklik langsung.
+3. **Supabase Cloud File Storage**
+   - Berkas dokumen (PDF, gambar, docs) diunggah langsung ke bucket `vault-documents` di Supabase Storage.
+   - File yang diupload dari laptop dapat langsung dibuka, dipreview, dan diunduh di browser HP.
 
-4. **Course & Skill Tracker (`/courses`)**
-   - Pelacak materi belajar / kursus daring.
-   - Parameter: Judul Kursus, Platform/Lembaga, Link URL, Target Selesai, Total Modul vs Modul Selesai, dan Dynamic Progress Bar (%).
-   - Kontrol cepat tombol `+1 Bab` / `-1 Bab`.
-   - Filter status: *Sedang Berjalan*, *Selesai*, *Rencana*.
-
-5. **Quick Notes & Knowledge Base (`/notes`)**
-   - Catatan ide harian & dokumentasi ringkas.
-   - Pencarian instan (Live Search) berdasarkan judul, isi catatan, atau tags.
-   - Fitur **Pin to Top** 📌 untuk menyematkan catatan penting di urutan teratas.
-   - Timestamp waktu pembuatan & terakhir diperbarui.
-
-6. **Document & Resource Vault (`/vault`)**
-   - Brankas penyimpanan dokumen dan link penting:
-     - **Mode 1: External Links** (Google Drive, Notion, GitHub, Figma, Docs).
-     - **Mode 2: Local File Upload** yang disimpan secara privat dan aman di **IndexedDB** browser (bebas dari batasan kuota 5MB LocalStorage).
-   - Fitur Preview file langsung di browser (PDF, Gambar) & tombol Download.
-
-7. **Pengaturan, Backup & Restore (`/settings`)**
-   - **Export Backup (.json)**: Mengunduh seluruh data teks & berkas file IndexedDB (terenkripsi Base64) ke dalam satu file `.json`.
-   - **Import / Restore (.json)**: Memulihkan kembali seluruh data workspace dari cadangan sebelumnya.
-   - **Reset Data**: Fitur kosongkan data dengan modal konfirmasi pengaman.
+4. **Modul Produktivitas Lengkap**
+   - **Dashboard Overview (`/`)**: Live clock, stat cards, daily focus widget, upcoming agenda timeline, dan active courses.
+   - **Daily Goals & Habit Tracker (`/goals`)**: Checklist harian, progres persentase %, streak konsistensi 🔥, dan kalender.
+   - **Schedule & Agenda Planner (`/schedule`)**: Timeline urut waktu terdekat, filter prioritas (High 🔴, Med 🟡, Low 🟢), link meeting online.
+   - **Course & Skill Tracker (`/courses`)**: Target tanggal, rasio modul total vs selesai, tombol `+1 Bab`, dan progress bar.
+   - **Quick Notes & Knowledge Base (`/notes`)**: Live search instan, tags, pin to top 📌.
+   - **Document & Resource Vault (`/vault`)**: Simpan link penting dan upload file dokumen ke cloud storage.
+   - **Backup & Settings (`/settings`)**: Export JSON, restore, status akun, dan reset data.
 
 ---
 
-## 🚀 Panduan Menjalankan Secara Lokal
+## ⚡ Panduan Setup Supabase (Hanya 3 Menit)
 
-1. **Clone repositori atau buka folder proyek**:
-   ```bash
-   cd Website_Journal
-   ```
+### Langkah 1: Buat Project di Supabase
+1. Buka [supabase.com](https://supabase.com) dan buat akun/login.
+2. Buat project baru (misal: `nexus-workspace`).
 
-2. **Install Dependensi**:
-   ```bash
-   npm install
-   ```
+### Langkah 2: Jalankan Skrip Database & Storage
+1. Di Dashboard Supabase, buka menu **SQL Editor** (ikon terminal di sidebar kiri).
+2. Buka file [`supabase_schema.sql`](./supabase_schema.sql) dari repositori ini, salin seluruh kodenya.
+3. Tempel di SQL Editor Supabase dan klik tombol **"Run"**.
+   > Skrip ini otomatis membuat tabel `goals`, `schedules`, `courses`, `notes`, `documents`, bucket storage `vault-documents`, serta seluruh policy keamanan RLS.
 
-3. **Jalankan Development Server**:
-   ```bash
-   npm run dev
-   ```
-   Buka browser di `http://localhost:3000`.
-
-4. **Build untuk Production**:
-   ```bash
-   npm run build
-   ```
+### Langkah 3: Ambil API Keys
+1. Buka menu **Project Settings** > **API**.
+2. Salin:
+   - **Project URL**
+   - **anon / public key**
 
 ---
 
-## ☁️ Panduan Deploy ke Vercel (100% Ready)
+## 💻 Setup Environment Variables di Lokal
 
-### Cara 1: Menggunakan Vercel Dashboard (Rekomendasi)
-1. Push proyek ini ke repositori **GitHub** / **GitLab** Anda.
-2. Buka [vercel.com](https://vercel.com) dan login.
-3. Klik **"Add New..."** > **"Project"**.
-4. Import repositori GitHub Anda.
-5. Vercel akan otomatis mendeteksi Framework **Next.js**. Klik **"Deploy"**.
+Buat file `.env.local` di root folder proyek:
 
-### Cara 2: Menggunakan Vercel CLI
-```bash
-npm i -g vercel
-vercel
+```env
+NEXT_PUBLIC_SUPABASE_URL=https://your-project-id.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your-actual-supabase-anon-key
 ```
 
+Jalankan secara lokal:
+```bash
+npm install
+npm run dev
+```
+Buka `http://localhost:3000` di browser.
+
 ---
 
-## 📁 Struktur Direktori Proyek
+## ☁️ Panduan Deploy ke Vercel
+
+1. Push folder proyek ini ke repositori **GitHub** Anda.
+2. Buka [vercel.com](https://vercel.com) > **"Add New..."** > **"Project"** > Import repositori Anda.
+3. Di bagian **"Environment Variables"**, tambahkan dua variabel berikut:
+   - `NEXT_PUBLIC_SUPABASE_URL` = (Project URL Supabase Anda)
+   - `NEXT_PUBLIC_SUPABASE_ANON_KEY` = (Anon public key Supabase Anda)
+4. Klik **"Deploy"**.
+5. Website Anda telah live! Buka URL Vercel tersebut di laptop maupun di browser HP Anda.
+
+---
+
+## 📁 Struktur Direktori
 
 ```
 Website_Journal/
 ├── app/
-│   ├── layout.tsx              # Root Layout & Provider
+│   ├── layout.tsx              # Root Layout, AuthProvider & AppProvider
 │   ├── page.tsx                # Dashboard Overview (Home Page)
-│   ├── globals.css             # Tailwind styling & custom scrollbar
-│   ├── goals/page.tsx          # Modul Daily Goals & Habits
-│   ├── schedule/page.tsx       # Modul Schedule & Agenda
+│   ├── login/page.tsx          # Login & Registrasi Supabase Auth
+│   ├── goals/page.tsx          # Modul Daily Goals & Habit Tracker
+│   ├── schedule/page.tsx       # Modul Jadwal & Agenda Planner
 │   ├── courses/page.tsx        # Modul Course & Skill Tracker
 │   ├── notes/page.tsx          # Modul Quick Notes
-│   ├── vault/page.tsx          # Modul Resource Vault
-│   └── settings/page.tsx       # Modul Backup, Restore & Reset
+│   ├── vault/page.tsx          # Modul Document & Resource Vault
+│   ├── settings/page.tsx       # Modul Settings & Status Akun
+│   └── globals.css
 ├── components/
-│   ├── dashboard/              # Widget-widget dashboard overview
-│   │   ├── GreetingBanner.tsx
-│   │   ├── StatCards.tsx
-│   │   ├── TodayGoalsWidget.tsx
-│   │   ├── TodayScheduleWidget.tsx
-│   │   ├── ActiveCoursesWidget.tsx
-│   │   └── RecentNotesWidget.tsx
-│   ├── layout/                 # Layout & navigasi
-│   │   ├── Sidebar.tsx
-│   │   ├── Header.tsx
-│   │   └── MobileNav.tsx
+│   ├── dashboard/              # Widget-widget overview
+│   ├── layout/                 # Sidebar, Header, MobileNav
+│   ├── shared/                 # SupabaseSetupBanner, QuickActionModal, ConfirmDialog
 │   ├── goals/GoalModal.tsx
 │   ├── schedule/ScheduleModal.tsx
 │   ├── courses/CourseModal.tsx
 │   ├── notes/NoteModal.tsx
-│   ├── vault/
-│   │   ├── VaultModal.tsx
-│   │   └── FilePreviewModal.tsx
-│   ├── shared/
-│   │   ├── QuickActionModal.tsx
-│   │   └── ConfirmDialog.tsx
+│   ├── vault/                  # VaultModal & FilePreviewModal
 │   └── ui/                     # UI Primitives
-│       ├── Button.tsx
-│       ├── Input.tsx
-│       ├── Textarea.tsx
-│       ├── Select.tsx
-│       ├── Badge.tsx
-│       ├── Modal.tsx
-│       ├── ProgressBar.tsx
-│       ├── EmptyState.tsx
-│       └── Toast.tsx
 ├── context/
-│   └── AppContext.tsx          # Global Client State & Persistent Storage Handlers
+│   ├── AuthContext.tsx         # Supabase Authentication & Session Provider
+│   └── AppContext.tsx          # Cross-Device Sync State Engine
 ├── lib/
+│   ├── supabase.ts             # Supabase Client Initializer
 │   ├── types.ts                # TypeScript Interfaces
-│   ├── utils.ts                # Date formatting, Streak calculation, cn helper
+│   ├── utils.ts                # Formatting & Streak Calculation
 │   ├── storage.ts              # LocalStorage & IndexedDB handlers
-│   └── backup.ts               # JSON Backup & Restore engine
+│   └── backup.ts               # JSON Backup & Restore
+├── supabase_schema.sql         # Skrip SQL DDL, RLS & Storage Buckets
+├── .env.local.example
 ├── package.json
-├── tailwind.config.ts
-├── tsconfig.json
-├── next.config.mjs
-├── vercel.json
-└── README.md
+└── vercel.json
 ```

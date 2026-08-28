@@ -1,14 +1,17 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { PlusCircle, Clock, Calendar as CalendarIcon, Sparkles } from 'lucide-react';
 import { useApp } from '@/context/AppContext';
+import { useAuth } from '@/context/AuthContext';
 import { formatDateIndo } from '@/lib/utils';
 
 export function Header() {
   const pathname = usePathname();
   const { openQuickAction } = useApp();
+  const { user } = useAuth();
   const [timeStr, setTimeStr] = useState<string>('');
   const [todayDate, setTodayDate] = useState<string>('');
 
@@ -74,6 +77,24 @@ export function Header() {
             <span>{timeStr || '--:--:--'}</span>
           </div>
         </div>
+
+        {/* User Auth indicator */}
+        {user ? (
+          <Link
+            href="/settings"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200/60 dark:border-slate-700 text-xs font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-200 transition-colors"
+          >
+            <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse"></span>
+            <span className="max-w-[100px] truncate hidden sm:inline">{user.email?.split('@')[0]}</span>
+          </Link>
+        ) : (
+          <Link
+            href="/login"
+            className="flex items-center gap-1 px-3 py-1.5 rounded-xl border border-emerald-500/50 bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 text-xs font-bold hover:bg-emerald-100 transition-colors"
+          >
+            <span>Login</span>
+          </Link>
+        )}
 
         {/* Global Quick Action button */}
         <button

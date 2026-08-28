@@ -2,6 +2,7 @@
 
 import React, { useState, useRef } from 'react';
 import { useApp } from '@/context/AppContext';
+import { useAuth } from '@/context/AuthContext';
 import {
   Settings,
   Download,
@@ -10,11 +11,16 @@ import {
   HardDrive,
   CheckCircle2,
   AlertTriangle,
-  Info,
-  Shield,
+  Database,
+  User,
+  LogOut,
+  LogIn,
+  Key,
+  ShieldCheck,
 } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { ConfirmDialog } from '@/components/shared/ConfirmDialog';
+import Link from 'next/link';
 
 export default function SettingsPage() {
   const {
@@ -27,6 +33,8 @@ export default function SettingsPage() {
     handleImport,
     clearAllData,
   } = useApp();
+
+  const { user, signOut, isConfigured } = useAuth();
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [resetDialogOpen, setResetDialogOpen] = useState(false);
@@ -65,22 +73,103 @@ export default function SettingsPage() {
       <div>
         <h1 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white tracking-tight flex items-center gap-2.5">
           <Settings className="h-6 w-6 text-slate-700 dark:text-slate-300" />
-          <span>Pengaturan & Manajemen Data</span>
+          <span>Pengaturan & Sinkronisasi Cloud</span>
         </h1>
         <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1">
-          Kontrol penuh atas data produktivitas Anda: Ekspor backup, restore cadangan, dan ringkasan penyimpanan.
+          Kelola akun Supabase, status sinkronisasi multi-device, dan cadangan data Anda.
         </p>
+      </div>
+
+      {/* Supabase Account & Connection Status Card */}
+      <div className="p-6 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-sm space-y-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2.5">
+            <div className="p-2 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400">
+              <Database className="h-5 w-5" />
+            </div>
+            <div>
+              <h3 className="text-sm font-bold text-slate-900 dark:text-white">
+                Koneksi Supabase Cloud
+              </h3>
+              <p className="text-xs text-slate-400">Database PostgreSQL & Row Level Security (RLS)</p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2">
+            {isConfigured ? (
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-300 border border-emerald-200/60 dark:border-emerald-800/40 text-xs font-semibold">
+                <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500" />
+                <span>Terkonfigurasi</span>
+              </span>
+            ) : (
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-50 dark:bg-amber-950/50 text-amber-700 dark:text-amber-300 border border-amber-200/60 dark:border-amber-800/40 text-xs font-semibold">
+                <Key className="h-3.5 w-3.5 text-amber-500" />
+                <span>Belum Terhubung</span>
+              </span>
+            )}
+          </div>
+        </div>
+
+        <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/40 border border-slate-100 dark:border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <div className="h-10 w-10 rounded-xl bg-emerald-600 text-white flex items-center justify-center font-bold text-sm">
+              {user?.email ? user.email[0].toUpperCase() : <User className="h-5 w-5" />}
+            </div>
+            <div>
+              {user ? (
+                <>
+                  <p className="text-xs font-bold text-slate-900 dark:text-white">
+                    {user.email}
+                  </p>
+                  <p className="text-[11px] text-emerald-600 dark:text-emerald-400 font-medium">
+                    Sinkronisasi Laptop & HP Aktif (User ID: {user.id.slice(0, 8)}...)
+                  </p>
+                </>
+              ) : (
+                <>
+                  <p className="text-xs font-bold text-slate-900 dark:text-white">
+                    Belum Masuk / Mode Offline
+                  </p>
+                  <p className="text-[11px] text-slate-400">
+                    Masuk ke akun Anda untuk menyinkronkan data antar-perangkat.
+                  </p>
+                </>
+              )}
+            </div>
+          </div>
+
+          <div>
+            {user ? (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => signOut()}
+                className="gap-2 text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40"
+              >
+                <LogOut className="h-4 w-4" />
+                <span>Keluar (Logout)</span>
+              </Button>
+            ) : (
+              <Link href="/login">
+                <Button size="sm" className="gap-2">
+                  <LogIn className="h-4 w-4" />
+                  <span>Login / Registrasi</span>
+                </Button>
+              </Link>
+            )}
+          </div>
+        </div>
       </div>
 
       {/* Storage Breakdown Summary */}
       <div className="p-6 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-sm space-y-4">
         <div className="flex items-center gap-2.5">
-          <div className="p-2 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400">
+          <div className="p-2 rounded-xl bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400">
             <HardDrive className="h-5 w-5" />
           </div>
           <div>
-            <h3 className="text-sm font-bold text-slate-900 dark:text-white">Status Penyimpanan Data</h3>
-            <p className="text-xs text-slate-400">Penyimpanan client-side (LocalStorage & IndexedDB)</p>
+            <h3 className="text-sm font-bold text-slate-900 dark:text-white">Ringkasan Data Tersimpan</h3>
+            <p className="text-xs text-slate-400">Jumlah item terdaftar di workspace Anda</p>
           </div>
         </div>
 
@@ -126,11 +215,11 @@ export default function SettingsPage() {
             <div className="flex items-center gap-2 text-emerald-600 dark:text-emerald-400">
               <Download className="h-5 w-5" />
               <h3 className="text-sm font-bold text-slate-900 dark:text-white">
-                Export / Cadangkan Data
+                Export Cadangan (.json)
               </h3>
             </div>
             <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
-              Unduh seluruh data Anda (target, jadwal, kursus, catatan, serta seluruh file di vault) ke dalam satu file berkas <strong>.json</strong> terstruktur.
+              Unduh seluruh target, jadwal, kursus, catatan, dan berkas ke dalam satu file backup <strong>.json</strong>.
             </p>
           </div>
 
@@ -154,7 +243,7 @@ export default function SettingsPage() {
               </h3>
             </div>
             <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
-              Pulihkan data workspace Anda dari file cadangan <strong>.json</strong> sebelumnya. Seluruh teks dan file IndexedDB akan dipulihkan secara otomatis.
+              Pulihkan data workspace Anda dari file cadangan <strong>.json</strong> sebelumnya.
             </p>
           </div>
 
@@ -186,7 +275,7 @@ export default function SettingsPage() {
           <h3 className="text-sm font-bold">Zona Bahaya: Reset Workspace</h3>
         </div>
         <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
-          Tindakan ini akan menghapus seluruh data yang tersimpan di browser Anda (Goals, Jadwal, Kursus, Catatan, dan Berkas Vault). Pastikan Anda telah melakukan ekspor backup jika masih membutuhkannya.
+          Tindakan ini akan mengosongkan seluruh data Anda (Goals, Jadwal, Kursus, Catatan, dan Berkas). Pastikan Anda telah melakukan ekspor backup jika masih membutuhkannya.
         </p>
         <div className="pt-2">
           <Button
@@ -207,7 +296,7 @@ export default function SettingsPage() {
         onClose={() => setResetDialogOpen(false)}
         onConfirm={clearAllData}
         title="Reset Seluruh Data Workspace?"
-        message="PERINGATAN: Semua target, jadwal, kursus, catatan, dan berkas di brankas akan dihapus bersih seketika dari browser ini. Apakah Anda yakin?"
+        message="PERINGATAN: Semua target, jadwal, kursus, catatan, dan berkas di brankas akan dihapus bersih seketika. Apakah Anda yakin?"
         confirmLabel="Ya, Hapus Semua Data"
         variant="danger"
       />

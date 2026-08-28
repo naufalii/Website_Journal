@@ -17,6 +17,8 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useApp } from '@/context/AppContext';
+import { useAuth } from '@/context/AuthContext';
+import { LogIn, LogOut, User as UserIcon } from 'lucide-react';
 
 const NAV_ITEMS = [
   { label: 'Dashboard', href: '/', icon: LayoutDashboard },
@@ -31,6 +33,7 @@ const NAV_ITEMS = [
 export function Sidebar() {
   const pathname = usePathname();
   const { openQuickAction, handleExport, goals, schedules, courses } = useApp();
+  const { user, signOut } = useAuth();
 
   // Quick stats for sidebar badges
   const todayGoalsCount = goals.length;
@@ -112,11 +115,44 @@ export function Sidebar() {
         })}
       </nav>
 
-      {/* Footer / Quick Backup Action */}
-      <div className="p-4 border-t border-slate-100 dark:border-slate-800/80 bg-slate-50/50 dark:bg-slate-900/50">
+      {/* Footer User Profile & Quick Backup Action */}
+      <div className="p-3 border-t border-slate-100 dark:border-slate-800/80 bg-slate-50/50 dark:bg-slate-900/50 space-y-2">
+        {user ? (
+          <div className="flex items-center justify-between p-2 rounded-xl bg-white dark:bg-slate-800 border border-slate-200/80 dark:border-slate-700">
+            <div className="flex items-center gap-2 min-w-0">
+              <div className="h-7 w-7 rounded-lg bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 flex items-center justify-center font-bold text-xs flex-shrink-0">
+                {user.email?.[0].toUpperCase() || 'U'}
+              </div>
+              <div className="min-w-0">
+                <p className="text-[11px] font-bold text-slate-900 dark:text-white truncate">
+                  {user.email}
+                </p>
+                <span className="text-[9px] text-emerald-600 dark:text-emerald-400 font-medium">
+                  ● Cloud Synced
+                </span>
+              </div>
+            </div>
+            <button
+              onClick={() => signOut()}
+              className="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition-colors"
+              title="Logout"
+            >
+              <LogOut className="h-3.5 w-3.5" />
+            </button>
+          </div>
+        ) : (
+          <Link
+            href="/login"
+            className="flex items-center justify-center gap-2 p-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition-colors shadow-sm"
+          >
+            <LogIn className="h-3.5 w-3.5" />
+            <span>Login Akun Supabase</span>
+          </Link>
+        )}
+
         <button
           onClick={() => handleExport()}
-          className="w-full flex items-center justify-between p-2.5 rounded-xl border border-slate-200 dark:border-slate-700/80 bg-white dark:bg-slate-800/80 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200 transition-colors text-xs font-medium"
+          className="w-full flex items-center justify-between p-2 rounded-xl border border-slate-200 dark:border-slate-700/80 bg-white dark:bg-slate-800/80 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200 transition-colors text-xs font-medium"
         >
           <div className="flex items-center gap-2">
             <Download className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400" />
