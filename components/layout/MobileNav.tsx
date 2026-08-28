@@ -32,10 +32,10 @@ export function MobileNav() {
 
   return (
     <>
-      {/* Floating Add Button on Mobile */}
+      {/* Floating Add Button on Mobile (Placed right above bottom bar) */}
       <button
         onClick={() => openQuickAction()}
-        className="md:hidden fixed right-5 bottom-24 z-40 h-12 w-12 rounded-full bg-brand-primary hover:bg-brand-deep text-white shadow-glow flex items-center justify-center active:scale-90 transition-transform duration-200"
+        className="md:hidden fixed right-4 sm:right-6 bottom-20 sm:bottom-24 z-30 h-12 w-12 rounded-full bg-brand-primary hover:bg-brand-deep text-white shadow-glow flex items-center justify-center active:scale-90 transition-transform duration-200"
         aria-label="Tambah Cepat"
       >
         <Plus className="h-6 w-6" />
