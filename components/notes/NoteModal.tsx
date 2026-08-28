@@ -5,7 +5,7 @@ import { Modal } from '@/components/ui/Modal';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Select } from '@/components/ui/Select';
-import { Textarea } from '@/components/ui/Textarea';
+import { MarkdownEditor } from './MarkdownEditor';
 import { Note, NoteCategory } from '@/lib/types';
 import { useApp } from '@/context/AppContext';
 
@@ -73,14 +73,14 @@ export function NoteModal({ isOpen, onClose, initialData }: NoteModalProps) {
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      title={initialData ? 'Edit Catatan' : 'Tulis Catatan Baru'}
-      description="Simpan ide, materi belajar, atau ringkasan penting."
-      maxWidth="lg"
+      title={initialData ? 'Edit Catatan (Markdown)' : 'Tulis Catatan Baru (Markdown)'}
+      description="Simpan ide, materi belajar, checklist, atau draf kode dengan syntax highlighting."
+      maxWidth="xl"
     >
       <form onSubmit={handleSubmit} className="space-y-4">
         <Input
           label="Judul Catatan"
-          placeholder="Contoh: Arsitektur Next.js, Ringkasan Buku"
+          placeholder="Contoh: Arsitektur Next.js, Query SQL Penting, Ringkasan Buku"
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           required
@@ -103,19 +103,24 @@ export function NoteModal({ isOpen, onClose, initialData }: NoteModalProps) {
 
           <Input
             label="Tags (Pisahkan koma)"
-            placeholder="react, tailwind, ui"
+            placeholder="react, tailwind, sql, dev"
             value={tags}
             onChange={(e) => setTags(e.target.value)}
           />
         </div>
 
-        <Textarea
-          label="Isi Catatan"
-          placeholder="Tuliskan isi catatan, poin penting, atau draf ide..."
-          rows={6}
-          value={content}
-          onChange={(e) => setContent(e.target.value)}
-        />
+        {/* Rich Markdown Editor */}
+        <div className="space-y-1.5">
+          <label className="block text-[11px] font-bold uppercase tracking-wider text-content-mutedLight dark:text-content-mutedDark">
+            Konten Catatan (Markdown & Kode)
+          </label>
+          <MarkdownEditor
+            value={content}
+            onChange={setContent}
+            rows={8}
+            placeholder="Tuliskan catatan dalam format Markdown, sertakan blok kode ```sql atau ```javascript ..."
+          />
+        </div>
 
         <div className="flex items-center gap-2 pt-1">
           <input
@@ -123,7 +128,7 @@ export function NoteModal({ isOpen, onClose, initialData }: NoteModalProps) {
             id="isPinned"
             checked={isPinned}
             onChange={(e) => setIsPinned(e.target.checked)}
-            className="h-4 w-4 rounded border-slate-300 text-brand-primary focus:ring-brand-primary"
+            className="h-4 w-4 rounded border-slate-300 text-brand-primary focus:ring-brand-primary cursor-pointer"
           />
           <label htmlFor="isPinned" className="text-xs font-bold text-content-primaryLight dark:text-content-primaryDark cursor-pointer">
             📌 Sematkan catatan ini di posisi teratas

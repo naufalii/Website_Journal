@@ -10,6 +10,7 @@ import {
   Edit2,
   Trash2,
   Tag,
+  Eye,
 } from 'lucide-react';
 import { Note } from '@/lib/types';
 import { formatShortDate } from '@/lib/utils';
@@ -17,6 +18,7 @@ import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { NoteModal } from '@/components/notes/NoteModal';
+import { NotePreviewModal } from '@/components/notes/NotePreviewModal';
 import { ConfirmDialog } from '@/components/shared/ConfirmDialog';
 
 export default function NotesPage() {
@@ -26,6 +28,7 @@ export default function NotesPage() {
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [modalOpen, setModalOpen] = useState(false);
   const [editingNote, setEditingNote] = useState<Note | null>(null);
+  const [previewNote, setPreviewNote] = useState<Note | null>(null);
   const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null);
 
   // Extract unique categories
@@ -57,7 +60,7 @@ export default function NotesPage() {
             <span>Catatan & Knowledge Base</span>
           </h1>
           <p className="text-xs sm:text-sm text-content-mutedLight dark:text-content-mutedDark mt-1">
-            Simpan ide kilat, ringkasan materi, checklist, dan dokumentasi penting.
+            Simpan ide kilat, ringkasan materi, checklist, dan dokumentasi Markdown.
           </p>
         </div>
 
@@ -113,7 +116,7 @@ export default function NotesPage() {
           description={
             searchQuery
               ? `Tidak ditemukan catatan yang sesuai dengan kata kunci "${searchQuery}".`
-              : 'Belum ada catatan yang ditulis. Tuangkan ide dan pemikiran Anda.'
+              : 'Belum ada catatan yang ditulis. Tuangkan ide, ringkasan, dan draf kode Anda.'
           }
           actionLabel="Tulis Catatan Pertama"
           onAction={() => {
@@ -126,21 +129,25 @@ export default function NotesPage() {
           {filteredNotes.map((note) => (
             <div
               key={note.id}
-              className={`p-5 rounded-3xl border transition-all flex flex-col justify-between space-y-4 ${
+              onClick={() => setPreviewNote(note)}
+              className={`p-5 rounded-3xl border transition-all flex flex-col justify-between space-y-4 cursor-pointer group ${
                 note.isPinned
                   ? 'bg-surface-light dark:bg-surface-dark border-amber-400/40 shadow-soft'
-                  : 'bg-surface-light dark:bg-surface-dark border-slate-100 dark:border-white/5 shadow-soft hover:border-brand-primary/20'
+                  : 'bg-surface-light dark:bg-surface-dark border-slate-100 dark:border-white/5 shadow-soft hover:border-brand-primary/30'
               }`}
             >
               <div className="space-y-2.5">
                 {/* Header: Title & Pin */}
                 <div className="flex items-start justify-between gap-2">
-                  <h3 className="text-sm font-bold text-content-primaryLight dark:text-content-primaryDark line-clamp-1">
+                  <h3 className="text-sm font-bold text-content-primaryLight dark:text-content-primaryDark line-clamp-1 group-hover:text-brand-primary dark:group-hover:text-brand-vibrant transition-colors">
                     {note.title}
                   </h3>
 
                   <button
-                    onClick={() => togglePinNote(note.id)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      togglePinNote(note.id);
+                    }}
                     className={`p-1.5 rounded-xl transition-colors ${
                       note.isPinned
                         ? 'text-amber-400 fill-amber-400 bg-amber-400/10'
@@ -153,7 +160,7 @@ export default function NotesPage() {
                 </div>
 
                 {/* Content preview */}
-                <p className="text-xs text-content-mutedLight dark:text-content-mutedDark whitespace-pre-line line-clamp-4 leading-relaxed">
+                <p className="text-xs text-content-mutedLight dark:text-content-mutedDark whitespace-pre-line line-clamp-4 leading-relaxed font-mono">
                   {note.content}
                 </p>
 
@@ -182,7 +189,14 @@ export default function NotesPage() {
                   <span className="text-[10px]">{formatShortDate(note.updatedAt.slice(0, 10))}</span>
                 </div>
 
-                <div className="flex items-center gap-1">
+                <div className="flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
+                  <button
+                    onClick={() => setPreviewNote(note)}
+                    className="p-1.5 rounded-xl text-content-mutedLight dark:text-content-mutedDark hover:text-brand-cyan hover:bg-surface-lightPill dark:hover:bg-surface-darkPill transition-colors"
+                    title="Pratinjau Markdown"
+                  >
+                    <Eye className="h-3.5 w-3.5" />
+                  </button>
                   <button
                     onClick={() => {
                       setEditingNote(note);
@@ -207,11 +221,22 @@ export default function NotesPage() {
         </div>
       )}
 
-      {/* Note Modal */}
+      {/* Note Modal (Markdown Editor) */}
       <NoteModal
         isOpen={modalOpen}
         onClose={() => setModalOpen(false)}
         initialData={editingNote}
+      />
+
+      {/* Note Preview Modal (Markdown Viewer) */}
+      <NotePreviewModal
+        note={previewNote}
+        isOpen={!!previewNote}
+        onClose={() => setPreviewNote(null)}
+        onEdit={(note) => {
+          setEditingNote(note);
+          setModalOpen(true);
+        }}
       />
 
       {/* Confirm Delete Dialog */}

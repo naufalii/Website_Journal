@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useApp } from '@/context/AppContext';
 import { useAuth } from '@/context/AuthContext';
 import { useTheme } from '@/context/ThemeContext';
@@ -15,11 +15,21 @@ import {
   LogOut,
   LogIn,
   AlertTriangle,
-  User,
+  Bell,
+  CheckCircle2,
+  XCircle,
 } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { ConfirmDialog } from '@/components/shared/ConfirmDialog';
 import Link from 'next/link';
+import {
+  isNotificationSupported,
+  getNotificationPermission,
+  requestNotificationPermission,
+  areNotificationsEnabled,
+  setNotificationsEnabled,
+  sendScheduleNotification,
+} from '@/lib/notifications';
 
 export default function SettingsPage() {
   const {
@@ -31,15 +41,65 @@ export default function SettingsPage() {
     handleExport,
     handleImport,
     clearAllData,
+    showToast,
   } = useApp();
 
   const { user, signOut } = useAuth();
-  const { theme, toggleTheme, setTheme } = useTheme();
+  const { theme, setTheme } = useTheme();
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [resetDialogOpen, setResetDialogOpen] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
   const [isImporting, setIsImporting] = useState(false);
+
+  // Notification State
+  const [notificationPermission, setNotificationPermission] = useState<string>('default');
+  const [notificationsActive, setNotificationsActive] = useState(false);
+
+  useEffect(() => {
+    if (isNotificationSupported()) {
+      setNotificationPermission(getNotificationPermission());
+      setNotificationsActive(areNotificationsEnabled());
+    }
+  }, []);
+
+  const handleToggleNotifications = async () => {
+    if (!isNotificationSupported()) {
+      showToast('Tidak Didukung', 'Browser Anda tidak mendukung Web Notification API.', 'error');
+      return;
+    }
+
+    if (Notification.permission !== 'granted') {
+      const result = await requestNotificationPermission();
+      setNotificationPermission(result);
+      if (result === 'granted') {
+        setNotificationsActive(true);
+        showToast('Notifikasi Aktif', 'Pengingat jadwal otomatis telah diaktifkan.');
+      } else {
+        showToast('Izin Ditolak', 'Harap izinkan notifikasi pada peramban Anda.', 'error');
+      }
+    } else {
+      const nextState = !notificationsActive;
+      setNotificationsEnabled(nextState);
+      setNotificationsActive(nextState);
+      showToast(
+        nextState ? 'Notifikasi Aktif' : 'Notifikasi Dinonaktifkan',
+        nextState ? 'Pengingat agenda akan dikirim 15 menit sebelum waktu mulai.' : 'Pengingat jadwal dimatikan.'
+      );
+    }
+  };
+
+  const handleTestNotification = async () => {
+    const sent = await sendScheduleNotification(
+      '⏰ Uji Pengingat Jadwal',
+      'Sistem notifikasi NexusWorkspace berjalan dengan sempurna!'
+    );
+    if (sent) {
+      showToast('Notifikasi Terkirim', 'Periksa notifikasi sistem di pojok layar Anda.');
+    } else {
+      showToast('Gagal Mengirim', 'Pastikan izin notifikasi telah aktif.', 'error');
+    }
+  };
 
   const onExportClick = async () => {
     setIsExporting(true);
@@ -77,7 +137,7 @@ export default function SettingsPage() {
           <span>Pengaturan & Preferensi</span>
         </h1>
         <p className="text-xs sm:text-sm text-content-mutedLight dark:text-content-mutedDark mt-1">
-          Kelola profil akun, tampilan tema, serta cadangan data ruang kerja Anda.
+          Kelola profil akun, notifikasi pengingat, tampilan tema, serta cadangan data ruang kerja Anda.
         </p>
       </div>
 
@@ -136,6 +196,66 @@ export default function SettingsPage() {
                 </Button>
               </Link>
             )}
+          </div>
+        </div>
+      </div>
+
+      {/* Notifications Settings Card */}
+      <div className="p-6 sm:p-7 rounded-3xl bg-surface-light dark:bg-surface-dark border border-slate-100 dark:border-white/5 shadow-soft space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="flex items-start gap-3">
+            <div className="p-2.5 rounded-2xl bg-brand-primary/10 text-brand-primary dark:text-brand-vibrant shadow-soft mt-0.5">
+              <Bell className="h-5 w-5" />
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <h3 className="text-sm font-bold text-content-primaryLight dark:text-content-primaryDark">
+                  Pengingat Jadwal Otomatis
+                </h3>
+                {notificationsActive ? (
+                  <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-500 bg-emerald-500/10 px-2 py-0.5 rounded-full">
+                    <CheckCircle2 className="h-3 w-3" />
+                    <span>Aktif</span>
+                  </span>
+                ) : (
+                  <span className="inline-flex items-center gap-1 text-[10px] font-bold text-content-mutedLight dark:text-content-mutedDark bg-surface-lightPill dark:bg-surface-darkPill px-2 py-0.5 rounded-full">
+                    <XCircle className="h-3 w-3" />
+                    <span>Nonaktif</span>
+                  </span>
+                )}
+              </div>
+              <p className="text-xs text-content-mutedLight dark:text-content-mutedDark mt-1">
+                Kirimkan notifikasi sistem di HP atau laptop 15 menit sebelum agenda dimulai.
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2 self-end sm:self-center">
+            {notificationsActive && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleTestNotification}
+                className="text-xs font-bold"
+              >
+                Uji Notifikasi
+              </Button>
+            )}
+            <button
+              onClick={handleToggleNotifications}
+              className={`relative inline-flex h-7 w-12 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
+                notificationsActive ? 'bg-brand-primary' : 'bg-slate-300 dark:bg-slate-700'
+              }`}
+              role="switch"
+              aria-checked={notificationsActive}
+            >
+              <span
+                aria-hidden="true"
+                className={`pointer-events-none inline-block h-6 w-6 transform rounded-full bg-white shadow-md ring-0 transition duration-200 ease-in-out ${
+                  notificationsActive ? 'translate-x-5' : 'translate-x-0'
+                }`}
+              />
+            </button>
           </div>
         </div>
       </div>
