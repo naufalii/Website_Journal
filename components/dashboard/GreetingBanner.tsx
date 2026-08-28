@@ -1,41 +1,48 @@
 'use client';
 
 import React from 'react';
-import { getGreeting } from '@/lib/utils';
-import { Sparkles, PlusCircle } from 'lucide-react';
+import { useAuth } from '@/context/AuthContext';
 import { useApp } from '@/context/AppContext';
+import { PlusCircle, Sparkles } from 'lucide-react';
+import { getLocalDateString } from '@/lib/utils';
 
 export function GreetingBanner() {
-  const { openQuickAction } = useApp();
-  const greeting = getGreeting();
+  const { user } = useAuth();
+  const { goals, openQuickAction } = useApp();
+
+  const todayStr = getLocalDateString();
+  const completedGoalsCount = goals.filter((g) => g.completedDates.includes(todayStr)).length;
+  const pendingGoalsCount = goals.length - completedGoalsCount;
+
+  const userName = user?.email ? user.email.split('@')[0] : 'Kawan';
 
   return (
-    <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-slate-900 via-slate-800 to-emerald-950 p-6 sm:p-8 text-white shadow-xl">
-      {/* Subtle background glow */}
-      <div className="absolute top-0 right-0 -mt-8 -mr-8 w-64 h-64 bg-emerald-500/20 rounded-full blur-3xl pointer-events-none" />
-      <div className="absolute bottom-0 left-1/3 -mb-12 w-48 h-48 bg-teal-500/10 rounded-full blur-2xl pointer-events-none" />
+    <div className="relative overflow-hidden rounded-4xl bg-gradient-to-br from-brand-deep via-brand-primary to-slate-900 p-6 sm:p-8 text-white shadow-soft transition-all duration-300">
+      {/* Background glow effects */}
+      <div className="absolute top-0 right-0 -mt-10 -mr-10 w-64 h-64 bg-brand-cyan/20 rounded-full blur-3xl pointer-events-none" />
+      <div className="absolute bottom-0 left-1/3 -mb-10 w-48 h-48 bg-brand-vibrant/30 rounded-full blur-2xl pointer-events-none" />
 
       <div className="relative z-10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
-        <div className="max-w-xl">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/20 border border-emerald-400/30 text-emerald-300 text-xs font-semibold mb-3">
-            <Sparkles className="h-3.5 w-3.5" />
-            <span>Personal Productivity Workspace</span>
-          </div>
-          <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight">
-            {greeting.text}
-          </h2>
-          <p className="mt-1.5 text-xs sm:text-sm text-slate-300 leading-relaxed">
-            {greeting.subtext}
+        <div>
+          <h1 className="text-2xl sm:text-3xl font-black tracking-tight capitalize">
+            Halo, {userName} 👋
+          </h1>
+          <p className="mt-2 text-xs sm:text-sm text-indigo-100/90 font-medium leading-relaxed max-w-lg">
+            {goals.length === 0
+              ? 'Selamat datang di ruang kerja produktivitas Anda. Siap menyusun target hari ini?'
+              : pendingGoalsCount > 0
+              ? `${pendingGoalsCount} target menunggu diselesaikan hari ini. Tetap fokus dan semangat!`
+              : 'Luar biasa! Seluruh target harian Anda telah terselesaikan hari ini.'}
           </p>
         </div>
 
         <div className="flex-shrink-0">
           <button
             onClick={() => openQuickAction()}
-            className="flex items-center gap-2 px-5 py-3 rounded-2xl bg-emerald-500 hover:bg-emerald-400 active:scale-95 text-slate-950 font-bold text-xs shadow-lg shadow-emerald-500/25 transition-all duration-150"
+            className="flex items-center gap-2 px-5 py-3 rounded-2xl bg-white text-brand-deep hover:bg-slate-50 active:scale-95 font-bold text-xs shadow-soft transition-all duration-200"
           >
-            <PlusCircle className="h-4 w-4" />
-            <span>+ Tambah Cepat</span>
+            <PlusCircle className="h-4 w-4 text-brand-primary" />
+            <span>+ Tambah Target</span>
           </button>
         </div>
       </div>

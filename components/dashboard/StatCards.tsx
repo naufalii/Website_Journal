@@ -2,116 +2,91 @@
 
 import React from 'react';
 import { useApp } from '@/context/AppContext';
-import { Target, Calendar, GraduationCap, Flame } from 'lucide-react';
-import { getLocalDateString, calculateStreak } from '@/lib/utils';
+import { CheckCircle2, Clock, GraduationCap, FolderLock } from 'lucide-react';
+import { getLocalDateString } from '@/lib/utils';
 import Link from 'next/link';
 
 export function StatCards() {
-  const { goals, schedules, courses } = useApp();
+  const { goals, schedules, courses, notes, vault } = useApp();
   const todayStr = getLocalDateString();
 
-  // Calculate Today's Goals Progress
-  const totalGoals = goals.length;
+  // 1. Target Selesai (Today's completed goals)
   const completedGoalsCount = goals.filter((g) => g.completedDates.includes(todayStr)).length;
-  const goalsPercentage = totalGoals > 0 ? Math.round((completedGoalsCount / totalGoals) * 100) : 0;
+  const totalGoalsCount = goals.length;
+  const goalsPercentage = totalGoalsCount > 0 ? Math.round((completedGoalsCount / totalGoalsCount) * 100) : 0;
 
-  // Calculate Max Active Streak across all goals
-  const maxStreak = goals.reduce((max, g) => {
-    const s = calculateStreak(g.completedDates);
-    return s > max ? s : max;
-  }, 0);
+  // 2. Sedang Berjalan (Pending schedules today + in progress goals)
+  const todayPendingSchedules = schedules.filter((s) => s.date === todayStr && !s.completed).length;
+  const pendingGoals = totalGoalsCount - completedGoalsCount;
+  const inProgressTotal = todayPendingSchedules + pendingGoals;
 
-  // Today's pending schedules
-  const todaySchedules = schedules.filter((s) => s.date === todayStr);
-  const pendingSchedulesCount = todaySchedules.filter((s) => !s.completed).length;
+  // 3. Kursus Aktif
+  const activeCoursesCount = courses.filter((c) => c.status === 'in_progress').length;
 
-  // Active courses
-  const activeCourses = courses.filter((c) => c.status === 'in_progress').length;
+  // 4. Catatan & Vault Resources
+  const totalResources = notes.length + vault.length;
 
-  const stats = [
+  const cards = [
     {
-      title: 'Target Hari Ini',
-      value: totalGoals > 0 ? `${completedGoalsCount}/${totalGoals} (${goalsPercentage}%)` : '0 Target',
-      description: totalGoals > 0 ? `${goalsPercentage}% selesai hari ini` : 'Belum ada target dibuat',
-      icon: Target,
-      color: 'emerald',
+      title: 'Target Selesai',
+      value: `${completedGoalsCount}`,
+      subtext: `${goalsPercentage}% dari ${totalGoalsCount} target tercapai`,
+      icon: CheckCircle2,
       href: '/goals',
+      accent: 'emerald',
     },
     {
-      title: 'Streak Konsistensi',
-      value: `${maxStreak} Hari`,
-      description: maxStreak > 0 ? 'Konsistensi aktif 🔥' : 'Mulai checklist target',
-      icon: Flame,
-      color: 'amber',
-      href: '/goals',
-    },
-    {
-      title: 'Agenda Hari Ini',
-      value: `${todaySchedules.length} Agenda`,
-      description: `${pendingSchedulesCount} agenda tersisa`,
-      icon: Calendar,
-      color: 'blue',
+      title: 'Sedang Berjalan',
+      value: `${inProgressTotal}`,
+      subtext: `${todayPendingSchedules} agenda & ${pendingGoals} target aktif`,
+      icon: Clock,
       href: '/schedule',
+      accent: 'amber',
     },
     {
-      title: 'Course Berjalan',
-      value: `${activeCourses} Skill`,
-      description: `${courses.filter((c) => c.status === 'completed').length} telah diselesaikan`,
+      title: 'Kursus Aktif',
+      value: `${activeCoursesCount}`,
+      subtext: `${courses.filter((c) => c.status === 'completed').length} kursus telah selesai`,
       icon: GraduationCap,
-      color: 'purple',
       href: '/courses',
+      accent: 'primary',
+    },
+    {
+      title: 'Catatan & Vault',
+      value: `${totalResources}`,
+      subtext: `${notes.length} catatan & ${vault.length} berkas vault`,
+      icon: FolderLock,
+      href: '/vault',
+      accent: 'cyan',
     },
   ];
 
-  const colorStyles = {
-    emerald: {
-      bg: 'bg-emerald-50 dark:bg-emerald-950/40',
-      icon: 'text-emerald-600 dark:text-emerald-400',
-      border: 'border-emerald-100 dark:border-emerald-900/30',
-    },
-    amber: {
-      bg: 'bg-amber-50 dark:bg-amber-950/40',
-      icon: 'text-amber-600 dark:text-amber-400',
-      border: 'border-amber-100 dark:border-amber-900/30',
-    },
-    blue: {
-      bg: 'bg-blue-50 dark:bg-blue-950/40',
-      icon: 'text-blue-600 dark:text-blue-400',
-      border: 'border-blue-100 dark:border-blue-900/30',
-    },
-    purple: {
-      bg: 'bg-purple-50 dark:bg-purple-950/40',
-      icon: 'text-purple-600 dark:text-purple-400',
-      border: 'border-purple-100 dark:border-purple-900/30',
-    },
-  };
-
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-      {stats.map((stat, i) => {
-        const Icon = stat.icon;
-        const style = colorStyles[stat.color as keyof typeof colorStyles];
+    <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      {cards.map((card, i) => {
+        const Icon = card.icon;
 
         return (
           <Link
             key={i}
-            href={stat.href}
-            className="group p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-sm hover:shadow-cardHover hover:border-slate-300 dark:hover:border-slate-700 transition-all duration-200"
+            href={card.href}
+            className="group bg-surface-light dark:bg-surface-dark p-5 rounded-3xl shadow-soft border border-slate-100 dark:border-white/5 hover:border-brand-primary/30 dark:hover:border-brand-vibrant/30 transition-all duration-200 flex flex-col justify-between"
           >
             <div className="flex items-center justify-between">
-              <span className="text-xs font-semibold text-slate-500 dark:text-slate-400">
-                {stat.title}
+              <span className="text-xs font-bold text-content-mutedLight dark:text-content-mutedDark">
+                {card.title}
               </span>
-              <div className={`p-2.5 rounded-xl ${style.bg} ${style.icon}`}>
+              <div className="p-2.5 rounded-2xl bg-surface-lightPill dark:bg-surface-darkPill text-brand-primary dark:text-brand-vibrant group-hover:scale-110 transition-transform">
                 <Icon className="h-4 w-4" />
               </div>
             </div>
-            <div className="mt-3">
-              <h3 className="text-xl font-extrabold text-slate-900 dark:text-white tracking-tight">
-                {stat.value}
+
+            <div className="mt-4">
+              <h3 className="text-2xl sm:text-3xl font-black text-brand-primary dark:text-brand-vibrant tracking-tight font-mono">
+                {card.value}
               </h3>
-              <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">
-                {stat.description}
+              <p className="mt-1 text-[11px] text-content-mutedLight dark:text-content-mutedDark truncate font-medium">
+                {card.subtext}
               </p>
             </div>
           </Link>

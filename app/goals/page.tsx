@@ -8,19 +8,16 @@ import {
   Flame,
   CheckCircle2,
   Circle,
-  MoreVertical,
   Edit2,
   Trash2,
-  Calendar as CalendarIcon,
-  ChevronLeft,
-  ChevronRight,
 } from 'lucide-react';
-import { Goal, GoalCategory } from '@/lib/types';
-import { getLocalDateString, formatDateIndo, calculateStreak } from '@/lib/utils';
+import { Goal } from '@/lib/types';
+import { getLocalDateString, calculateStreak } from '@/lib/utils';
 import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
 import { ProgressBar } from '@/components/ui/ProgressBar';
 import { EmptyState } from '@/components/ui/EmptyState';
+import { HorizontalDateStrip } from '@/components/dashboard/HorizontalDateStrip';
 import { GoalModal } from '@/components/goals/GoalModal';
 import { ConfirmDialog } from '@/components/shared/ConfirmDialog';
 
@@ -32,17 +29,6 @@ export default function GoalsPage() {
   const [modalOpen, setModalOpen] = useState(false);
   const [editingGoal, setEditingGoal] = useState<Goal | null>(null);
   const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null);
-
-  const todayStr = getLocalDateString();
-  const isToday = selectedDate === todayStr;
-
-  // Date navigation handlers
-  const changeDateBy = (offset: number) => {
-    const [y, m, d] = selectedDate.split('-').map(Number);
-    const date = new Date(y, m - 1, d);
-    date.setDate(date.getDate() + offset);
-    setSelectedDate(getLocalDateString(date));
-  };
 
   // Filtered goals
   const filteredGoals = goals.filter((g) => {
@@ -57,12 +43,12 @@ export default function GoalsPage() {
 
   const categories = [
     { id: 'all', label: 'Semua Kategori' },
-    { id: 'career', label: '💼 Karir' },
-    { id: 'learning', label: '📚 Belajar' },
-    { id: 'health', label: '🏃 Kesehatan' },
-    { id: 'finance', label: '💰 Finansial' },
-    { id: 'personal', label: '✨ Personal' },
-    { id: 'general', label: '🎯 Umum' },
+    { id: 'career', label: 'Karir' },
+    { id: 'learning', label: 'Belajar' },
+    { id: 'health', label: 'Kesehatan' },
+    { id: 'finance', label: 'Finansial' },
+    { id: 'personal', label: 'Personal' },
+    { id: 'general', label: 'Umum' },
   ];
 
   return (
@@ -70,11 +56,11 @@ export default function GoalsPage() {
       {/* Page Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white tracking-tight flex items-center gap-2.5">
-            <Target className="h-6 w-6 text-emerald-600 dark:text-emerald-400" />
+          <h1 className="text-xl sm:text-2xl font-black text-content-primaryLight dark:text-content-primaryDark tracking-tight flex items-center gap-2.5">
+            <Target className="h-6 w-6 text-brand-primary dark:text-brand-vibrant" />
             <span>Daily Goals & Habit Tracker</span>
           </h1>
-          <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1">
+          <p className="text-xs sm:text-sm text-content-mutedLight dark:text-content-mutedDark mt-1">
             Bangun kebiasaan positif dan pantau konsistensi pencapaian setiap hari.
           </p>
         </div>
@@ -84,67 +70,38 @@ export default function GoalsPage() {
             setEditingGoal(null);
             setModalOpen(true);
           }}
-          className="shadow-md shadow-emerald-600/20"
+          className="shadow-glow"
         >
           <Plus className="h-4 w-4" />
           <span>Tambah Target</span>
         </Button>
       </div>
 
-      {/* Date Navigation & Progress Banner */}
-      <div className="p-5 sm:p-6 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-sm space-y-4">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          {/* Date Selector */}
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => changeDateBy(-1)}
-              className="p-2 rounded-xl border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300"
-              title="Hari Sebelumnya"
-            >
-              <ChevronLeft className="h-4 w-4" />
-            </button>
+      {/* Horizontal 7-Day Calendar Strip */}
+      <HorizontalDateStrip
+        selectedDate={selectedDate}
+        onSelectDate={(newDate) => setSelectedDate(newDate)}
+      />
 
-            <div className="flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-100 dark:bg-slate-800/80 border border-slate-200/60 dark:border-slate-700/60 text-xs font-bold text-slate-800 dark:text-slate-200">
-              <CalendarIcon className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
-              <span>{formatDateIndo(selectedDate)}</span>
-              {isToday && (
-                <span className="ml-1 text-[10px] bg-emerald-600 text-white px-2 py-0.5 rounded-full font-semibold">
-                  Hari Ini
-                </span>
-              )}
-            </div>
-
-            <button
-              onClick={() => changeDateBy(1)}
-              className="p-2 rounded-xl border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300"
-              title="Hari Berikutnya"
-            >
-              <ChevronRight className="h-4 w-4" />
-            </button>
-
-            {!isToday && (
-              <button
-                onClick={() => setSelectedDate(todayStr)}
-                className="text-xs font-semibold text-emerald-600 dark:text-emerald-400 hover:underline px-2"
-              >
-                Kembali ke Hari Ini
-              </button>
-            )}
+      {/* Progress & Stat Banner */}
+      <div className="p-5 sm:p-6 rounded-3xl bg-surface-light dark:bg-surface-dark border border-slate-100 dark:border-white/5 shadow-soft space-y-4">
+        <div className="flex items-center justify-between">
+          <div>
+            <h3 className="text-xs font-bold uppercase tracking-wider text-content-mutedLight dark:text-content-mutedDark">
+              Pencapaian Hari Ini
+            </h3>
+            <p className="text-lg sm:text-xl font-black text-brand-primary dark:text-brand-vibrant font-mono mt-0.5">
+              {completedCount} / {totalCount} Target ({progressPercent}%)
+            </p>
           </div>
 
-          {/* Quick Stat Indicator */}
-          <div className="flex items-center gap-3">
-            <div className="text-right">
-              <p className="text-xs text-slate-400">Pencapaian</p>
-              <p className="text-base font-extrabold text-slate-800 dark:text-slate-100 font-mono">
-                {completedCount}/{totalCount} ({progressPercent}%)
-              </p>
-            </div>
-          </div>
+          <span className="text-xs font-bold text-content-mutedLight dark:text-content-mutedDark">
+            {progressPercent === 100 && totalCount > 0 ? '🎉 Sempurna!' : 'Terus Semangat!'}
+          </span>
         </div>
 
         {totalCount > 0 && (
-          <ProgressBar value={progressPercent} size="md" color="emerald" showPercentage={false} />
+          <ProgressBar value={progressPercent} size="md" color="brand" showPercentage={false} />
         )}
       </div>
 
@@ -154,10 +111,10 @@ export default function GoalsPage() {
           <button
             key={cat.id}
             onClick={() => setSelectedCategory(cat.id)}
-            className={`px-3.5 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all ${
+            className={`px-4 py-2 rounded-2xl text-xs font-bold whitespace-nowrap transition-all ${
               selectedCategory === cat.id
-                ? 'bg-emerald-600 text-white shadow-sm shadow-emerald-600/20'
-                : 'bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-50'
+                ? 'bg-brand-primary text-white shadow-soft font-bold'
+                : 'bg-surface-light dark:bg-surface-dark border border-slate-100 dark:border-white/5 text-content-mutedLight dark:text-content-mutedDark hover:bg-surface-lightPill dark:hover:bg-surface-darkPill'
             }`}
           >
             {cat.label}
@@ -190,10 +147,10 @@ export default function GoalsPage() {
             return (
               <div
                 key={goal.id}
-                className={`p-4 rounded-2xl border transition-all duration-150 flex items-start justify-between gap-3 ${
+                className={`p-4 sm:p-5 rounded-3xl border transition-all duration-150 flex items-start justify-between gap-3 ${
                   isCompleted
-                    ? 'bg-emerald-50/40 dark:bg-emerald-950/20 border-emerald-200/80 dark:border-emerald-800/40 shadow-sm'
-                    : 'bg-white dark:bg-slate-900 border-slate-200/80 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700'
+                    ? 'bg-brand-primary/5 dark:bg-brand-primary/10 border-brand-primary/20 shadow-soft'
+                    : 'bg-surface-light dark:bg-surface-dark border-slate-100 dark:border-white/5 shadow-soft hover:border-brand-primary/20'
                 }`}
               >
                 {/* Left check and title */}
@@ -206,18 +163,18 @@ export default function GoalsPage() {
                     className="mt-0.5 flex-shrink-0 transition-transform active:scale-90 focus:outline-none"
                   >
                     {isCompleted ? (
-                      <CheckCircle2 className="h-5 w-5 text-emerald-600 dark:text-emerald-400 fill-emerald-100 dark:fill-emerald-950" />
+                      <CheckCircle2 className="h-5 w-5 text-brand-primary dark:text-brand-vibrant" />
                     ) : (
-                      <Circle className="h-5 w-5 text-slate-300 dark:text-slate-600 hover:text-emerald-500" />
+                      <Circle className="h-5 w-5 text-content-mutedLight dark:text-content-mutedDark hover:text-brand-primary" />
                     )}
                   </button>
 
                   <div className="min-w-0">
                     <h3
-                      className={`text-sm font-bold truncate transition-colors ${
+                      className={`text-xs sm:text-sm font-bold truncate transition-colors ${
                         isCompleted
-                          ? 'line-through text-slate-400 dark:text-slate-500'
-                          : 'text-slate-900 dark:text-slate-100'
+                          ? 'line-through text-content-mutedLight dark:text-content-mutedDark'
+                          : 'text-content-primaryLight dark:text-content-primaryDark'
                       }`}
                     >
                       {goal.title}
@@ -227,7 +184,7 @@ export default function GoalsPage() {
                         {goal.category}
                       </Badge>
                       {streak > 0 && (
-                        <span className="inline-flex items-center gap-1 text-[11px] font-bold text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/50 px-2 py-0.5 rounded-full border border-amber-200/50 dark:border-amber-800/40">
+                        <span className="inline-flex items-center gap-1 text-[11px] font-bold text-amber-500 bg-amber-500/10 px-2.5 py-0.5 rounded-full">
                           <Flame className="h-3 w-3 fill-amber-500 text-amber-500" />
                           <span>{streak} Hari Streak</span>
                         </span>
@@ -243,17 +200,17 @@ export default function GoalsPage() {
                       setEditingGoal(goal);
                       setModalOpen(true);
                     }}
-                    className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+                    className="p-2 rounded-xl text-content-mutedLight dark:text-content-mutedDark hover:text-brand-primary dark:hover:text-brand-vibrant hover:bg-surface-lightPill dark:hover:bg-surface-darkPill transition-colors"
                     title="Edit Goal"
                   >
-                    <Edit2 className="h-3.5 w-3.5" />
+                    <Edit2 className="h-4 w-4" />
                   </button>
                   <button
                     onClick={() => setDeleteTargetId(goal.id)}
-                    className="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition-colors"
+                    className="p-2 rounded-xl text-content-mutedLight dark:text-content-mutedDark hover:text-rose-500 hover:bg-rose-500/10 transition-colors"
                     title="Hapus Goal"
                   >
-                    <Trash2 className="h-3.5 w-3.5" />
+                    <Trash2 className="h-4 w-4" />
                   </button>
                 </div>
               </div>
@@ -277,7 +234,7 @@ export default function GoalsPage() {
           if (deleteTargetId) deleteGoal(deleteTargetId);
         }}
         title="Hapus Target Harian?"
-        message="Target ini beserta riwayat checklist akan dihapus secara permanen dari browser Anda."
+        message="Target ini beserta riwayat checklist akan dihapus secara permanen dari ruang kerja Anda."
       />
     </div>
   );

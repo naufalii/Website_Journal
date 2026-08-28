@@ -3,20 +3,19 @@
 import React, { useState, useRef } from 'react';
 import { useApp } from '@/context/AppContext';
 import { useAuth } from '@/context/AuthContext';
+import { useTheme } from '@/context/ThemeContext';
 import {
   Settings,
   Download,
   Upload,
   Trash2,
   HardDrive,
-  CheckCircle2,
-  AlertTriangle,
-  Database,
-  User,
+  Sun,
+  Moon,
   LogOut,
   LogIn,
-  Key,
-  ShieldCheck,
+  AlertTriangle,
+  User,
 } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { ConfirmDialog } from '@/components/shared/ConfirmDialog';
@@ -34,7 +33,8 @@ export default function SettingsPage() {
     clearAllData,
   } = useApp();
 
-  const { user, signOut, isConfigured } = useAuth();
+  const { user, signOut } = useAuth();
+  const { theme, toggleTheme, setTheme } = useTheme();
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [resetDialogOpen, setResetDialogOpen] = useState(false);
@@ -66,72 +66,51 @@ export default function SettingsPage() {
   };
 
   const totalVaultFiles = vault.filter((v) => v.type === 'file').length;
+  const userName = user?.email ? user.email.split('@')[0] : 'Pengguna';
 
   return (
     <div className="space-y-6 max-w-4xl animate-in fade-in duration-300">
       {/* Header */}
       <div>
-        <h1 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white tracking-tight flex items-center gap-2.5">
-          <Settings className="h-6 w-6 text-slate-700 dark:text-slate-300" />
-          <span>Pengaturan & Sinkronisasi Cloud</span>
+        <h1 className="text-xl sm:text-2xl font-black text-content-primaryLight dark:text-content-primaryDark tracking-tight flex items-center gap-2.5">
+          <Settings className="h-6 w-6 text-brand-primary dark:text-brand-vibrant" />
+          <span>Pengaturan & Preferensi</span>
         </h1>
-        <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1">
-          Kelola akun Supabase, status sinkronisasi multi-device, dan cadangan data Anda.
+        <p className="text-xs sm:text-sm text-content-mutedLight dark:text-content-mutedDark mt-1">
+          Kelola profil akun, tampilan tema, serta cadangan data ruang kerja Anda.
         </p>
       </div>
 
-      {/* Supabase Account & Connection Status Card */}
-      <div className="p-6 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-sm space-y-4">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2.5">
-            <div className="p-2 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400">
-              <Database className="h-5 w-5" />
-            </div>
-            <div>
-              <h3 className="text-sm font-bold text-slate-900 dark:text-white">
-                Koneksi Supabase Cloud
-              </h3>
-              <p className="text-xs text-slate-400">Database PostgreSQL & Row Level Security (RLS)</p>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-2">
-            {isConfigured ? (
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-300 border border-emerald-200/60 dark:border-emerald-800/40 text-xs font-semibold">
-                <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500" />
-                <span>Terkonfigurasi</span>
-              </span>
-            ) : (
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-50 dark:bg-amber-950/50 text-amber-700 dark:text-amber-300 border border-amber-200/60 dark:border-amber-800/40 text-xs font-semibold">
-                <Key className="h-3.5 w-3.5 text-amber-500" />
-                <span>Belum Terhubung</span>
-              </span>
-            )}
-          </div>
-        </div>
-
-        <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/40 border border-slate-100 dark:border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div className="flex items-center gap-3">
-            <div className="h-10 w-10 rounded-xl bg-emerald-600 text-white flex items-center justify-center font-bold text-sm">
-              {user?.email ? user.email[0].toUpperCase() : <User className="h-5 w-5" />}
+      {/* Account Profile Card */}
+      <div className="p-6 sm:p-7 rounded-3xl bg-surface-light dark:bg-surface-dark border border-slate-100 dark:border-white/5 shadow-soft space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="flex items-center gap-3.5">
+            <div className="h-14 w-14 rounded-full bg-gradient-to-tr from-brand-primary via-brand-vibrant to-brand-cyan text-white flex items-center justify-center font-black text-xl shadow-glow">
+              {userName[0].toUpperCase()}
             </div>
             <div>
               {user ? (
                 <>
-                  <p className="text-xs font-bold text-slate-900 dark:text-white">
+                  <div className="flex items-center gap-2">
+                    <h3 className="text-base font-bold text-content-primaryLight dark:text-content-primaryDark capitalize">
+                      {userName}
+                    </h3>
+                    <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-[10px] font-bold">
+                      <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                      <span>Akun Aktif</span>
+                    </span>
+                  </div>
+                  <p className="text-xs text-content-mutedLight dark:text-content-mutedDark mt-0.5">
                     {user.email}
-                  </p>
-                  <p className="text-[11px] text-emerald-600 dark:text-emerald-400 font-medium">
-                    Sinkronisasi Laptop & HP Aktif (User ID: {user.id.slice(0, 8)}...)
                   </p>
                 </>
               ) : (
                 <>
-                  <p className="text-xs font-bold text-slate-900 dark:text-white">
-                    Belum Masuk / Mode Offline
-                  </p>
-                  <p className="text-[11px] text-slate-400">
-                    Masuk ke akun Anda untuk menyinkronkan data antar-perangkat.
+                  <h3 className="text-base font-bold text-content-primaryLight dark:text-content-primaryDark">
+                    Mode Tamu / Offline
+                  </h3>
+                  <p className="text-xs text-content-mutedLight dark:text-content-mutedDark mt-0.5">
+                    Masuk ke akun Anda untuk menyinkronkan data antar-perangkat secara otomatis.
                   </p>
                 </>
               )}
@@ -144,16 +123,16 @@ export default function SettingsPage() {
                 variant="outline"
                 size="sm"
                 onClick={() => signOut()}
-                className="gap-2 text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40"
+                className="gap-2 text-rose-500 hover:bg-rose-500/10 border-rose-500/20"
               >
                 <LogOut className="h-4 w-4" />
                 <span>Keluar (Logout)</span>
               </Button>
             ) : (
               <Link href="/login">
-                <Button size="sm" className="gap-2">
+                <Button size="sm" className="gap-2 shadow-glow">
                   <LogIn className="h-4 w-4" />
-                  <span>Login / Registrasi</span>
+                  <span>Masuk / Daftar Akun</span>
                 </Button>
               </Link>
             )}
@@ -161,47 +140,90 @@ export default function SettingsPage() {
         </div>
       </div>
 
+      {/* Theme Switcher Card */}
+      <div className="p-6 sm:p-7 rounded-3xl bg-surface-light dark:bg-surface-dark border border-slate-100 dark:border-white/5 shadow-soft space-y-4">
+        <div className="flex items-center justify-between">
+          <div>
+            <h3 className="text-sm font-bold text-content-primaryLight dark:text-content-primaryDark">
+              Tema Tampilan
+            </h3>
+            <p className="text-xs text-content-mutedLight dark:text-content-mutedDark mt-0.5">
+              Pilih mode tampilan gelap (Dark) atau terang (Light) yang nyaman untuk mata Anda.
+            </p>
+          </div>
+
+          <div className="flex items-center gap-2 p-1 rounded-2xl bg-surface-lightPill dark:bg-surface-darkPill">
+            <button
+              onClick={() => setTheme('light')}
+              className={`flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold transition-all ${
+                theme === 'light'
+                  ? 'bg-white text-brand-primary shadow-soft'
+                  : 'text-content-mutedLight dark:text-content-mutedDark hover:text-content-primaryLight'
+              }`}
+            >
+              <Sun className="h-4 w-4 text-amber-500" />
+              <span>Light</span>
+            </button>
+            <button
+              onClick={() => setTheme('dark')}
+              className={`flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold transition-all ${
+                theme === 'dark'
+                  ? 'bg-surface-dark text-brand-vibrant shadow-soft border border-white/10'
+                  : 'text-content-mutedLight dark:text-content-mutedDark hover:text-content-primaryDark'
+              }`}
+            >
+              <Moon className="h-4 w-4 text-brand-vibrant" />
+              <span>Dark</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
       {/* Storage Breakdown Summary */}
-      <div className="p-6 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-sm space-y-4">
+      <div className="p-6 sm:p-7 rounded-3xl bg-surface-light dark:bg-surface-dark border border-slate-100 dark:border-white/5 shadow-soft space-y-4">
         <div className="flex items-center gap-2.5">
-          <div className="p-2 rounded-xl bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400">
+          <div className="p-2 rounded-2xl bg-surface-lightPill dark:bg-surface-darkPill text-brand-primary dark:text-brand-vibrant">
             <HardDrive className="h-5 w-5" />
           </div>
           <div>
-            <h3 className="text-sm font-bold text-slate-900 dark:text-white">Ringkasan Data Tersimpan</h3>
-            <p className="text-xs text-slate-400">Jumlah item terdaftar di workspace Anda</p>
+            <h3 className="text-sm font-bold text-content-primaryLight dark:text-content-primaryDark">
+              Ringkasan Data Tersimpan
+            </h3>
+            <p className="text-xs text-content-mutedLight dark:text-content-mutedDark">
+              Jumlah data aktif pada workspace Anda
+            </p>
           </div>
         </div>
 
         <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 pt-2">
-          <div className="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800/40 border border-slate-100 dark:border-slate-800 text-center">
-            <span className="text-[11px] text-slate-400 font-semibold">Daily Goals</span>
-            <p className="text-lg font-bold text-slate-800 dark:text-slate-100 font-mono mt-0.5">
+          <div className="p-4 rounded-2xl bg-surface-lightPill dark:bg-surface-darkPill text-center">
+            <span className="text-[11px] text-content-mutedLight dark:text-content-mutedDark font-bold">Target Harian</span>
+            <p className="text-xl font-black text-brand-primary dark:text-brand-vibrant font-mono mt-1">
               {goals.length}
             </p>
           </div>
-          <div className="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800/40 border border-slate-100 dark:border-slate-800 text-center">
-            <span className="text-[11px] text-slate-400 font-semibold">Agenda/Jadwal</span>
-            <p className="text-lg font-bold text-slate-800 dark:text-slate-100 font-mono mt-0.5">
+          <div className="p-4 rounded-2xl bg-surface-lightPill dark:bg-surface-darkPill text-center">
+            <span className="text-[11px] text-content-mutedLight dark:text-content-mutedDark font-bold">Agenda</span>
+            <p className="text-xl font-black text-brand-primary dark:text-brand-vibrant font-mono mt-1">
               {schedules.length}
             </p>
           </div>
-          <div className="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800/40 border border-slate-100 dark:border-slate-800 text-center">
-            <span className="text-[11px] text-slate-400 font-semibold">Courses</span>
-            <p className="text-lg font-bold text-slate-800 dark:text-slate-100 font-mono mt-0.5">
+          <div className="p-4 rounded-2xl bg-surface-lightPill dark:bg-surface-darkPill text-center">
+            <span className="text-[11px] text-content-mutedLight dark:text-content-mutedDark font-bold">Kursus</span>
+            <p className="text-xl font-black text-brand-primary dark:text-brand-vibrant font-mono mt-1">
               {courses.length}
             </p>
           </div>
-          <div className="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800/40 border border-slate-100 dark:border-slate-800 text-center">
-            <span className="text-[11px] text-slate-400 font-semibold">Catatan</span>
-            <p className="text-lg font-bold text-slate-800 dark:text-slate-100 font-mono mt-0.5">
+          <div className="p-4 rounded-2xl bg-surface-lightPill dark:bg-surface-darkPill text-center">
+            <span className="text-[11px] text-content-mutedLight dark:text-content-mutedDark font-bold">Catatan</span>
+            <p className="text-xl font-black text-brand-primary dark:text-brand-vibrant font-mono mt-1">
               {notes.length}
             </p>
           </div>
-          <div className="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800/40 border border-slate-100 dark:border-slate-800 text-center col-span-2 sm:col-span-1">
-            <span className="text-[11px] text-slate-400 font-semibold">Resource Vault</span>
-            <p className="text-lg font-bold text-slate-800 dark:text-slate-100 font-mono mt-0.5">
-              {vault.length} <span className="text-xs text-emerald-600 font-normal">({totalVaultFiles} file)</span>
+          <div className="p-4 rounded-2xl bg-surface-lightPill dark:bg-surface-darkPill text-center col-span-2 sm:col-span-1">
+            <span className="text-[11px] text-content-mutedLight dark:text-content-mutedDark font-bold">Resource</span>
+            <p className="text-xl font-black text-brand-primary dark:text-brand-vibrant font-mono mt-1">
+              {vault.length} <span className="text-xs text-brand-cyan font-normal">({totalVaultFiles} file)</span>
             </p>
           </div>
         </div>
@@ -210,40 +232,40 @@ export default function SettingsPage() {
       {/* Backup & Restore Action Section */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Export Card */}
-        <div className="p-6 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-sm flex flex-col justify-between space-y-4">
+        <div className="p-6 sm:p-7 rounded-3xl bg-surface-light dark:bg-surface-dark border border-slate-100 dark:border-white/5 shadow-soft flex flex-col justify-between space-y-4">
           <div className="space-y-2">
-            <div className="flex items-center gap-2 text-emerald-600 dark:text-emerald-400">
+            <div className="flex items-center gap-2 text-brand-primary dark:text-brand-vibrant">
               <Download className="h-5 w-5" />
-              <h3 className="text-sm font-bold text-slate-900 dark:text-white">
-                Export Cadangan (.json)
+              <h3 className="text-sm font-bold text-content-primaryLight dark:text-content-primaryDark">
+                Cadangkan Data (.json)
               </h3>
             </div>
-            <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
-              Unduh seluruh target, jadwal, kursus, catatan, dan berkas ke dalam satu file backup <strong>.json</strong>.
+            <p className="text-xs text-content-mutedLight dark:text-content-mutedDark leading-relaxed">
+              Unduh seluruh target, jadwal, kursus, catatan, dan berkas ke dalam satu berkas cadangan offline.
             </p>
           </div>
 
           <Button
             onClick={onExportClick}
             disabled={isExporting}
-            className="w-full gap-2 text-xs font-bold shadow-md shadow-emerald-600/20"
+            className="w-full gap-2 text-xs font-bold shadow-soft hover:shadow-glow"
           >
             <Download className="h-4 w-4" />
-            <span>{isExporting ? 'Membuat Cadangan...' : 'Download File Backup (.json)'}</span>
+            <span>{isExporting ? 'Memproses...' : 'Unduh Berkas Cadangan'}</span>
           </Button>
         </div>
 
         {/* Import Card */}
-        <div className="p-6 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-sm flex flex-col justify-between space-y-4">
+        <div className="p-6 sm:p-7 rounded-3xl bg-surface-light dark:bg-surface-dark border border-slate-100 dark:border-white/5 shadow-soft flex flex-col justify-between space-y-4">
           <div className="space-y-2">
-            <div className="flex items-center gap-2 text-blue-600 dark:text-blue-400">
+            <div className="flex items-center gap-2 text-brand-cyan">
               <Upload className="h-5 w-5" />
-              <h3 className="text-sm font-bold text-slate-900 dark:text-white">
-                Import / Pulihkan Data
+              <h3 className="text-sm font-bold text-content-primaryLight dark:text-content-primaryDark">
+                Pulihkan Data (.json)
               </h3>
             </div>
-            <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
-              Pulihkan data workspace Anda dari file cadangan <strong>.json</strong> sebelumnya.
+            <p className="text-xs text-content-mutedLight dark:text-content-mutedDark leading-relaxed">
+              Pulihkan data ruang kerja Anda dari berkas cadangan JSON sebelumnya.
             </p>
           </div>
 
@@ -259,23 +281,23 @@ export default function SettingsPage() {
               variant="outline"
               onClick={() => fileInputRef.current?.click()}
               disabled={isImporting}
-              className="w-full gap-2 text-xs font-bold border-slate-300 dark:border-slate-700"
+              className="w-full gap-2 text-xs font-bold"
             >
-              <Upload className="h-4 w-4 text-blue-600" />
-              <span>{isImporting ? 'Memulihkan Data...' : 'Pilih File Backup (.json)'}</span>
+              <Upload className="h-4 w-4 text-brand-cyan" />
+              <span>{isImporting ? 'Memulihkan...' : 'Pilih Berkas Cadangan'}</span>
             </Button>
           </div>
         </div>
       </div>
 
       {/* Danger Zone: Clear all data */}
-      <div className="p-6 rounded-3xl bg-rose-50/40 dark:bg-rose-950/20 border border-rose-200 dark:border-rose-900/40 space-y-3">
-        <div className="flex items-center gap-2 text-rose-600 dark:text-rose-400">
+      <div className="p-6 sm:p-7 rounded-3xl bg-rose-500/5 border border-rose-500/20 space-y-3">
+        <div className="flex items-center gap-2 text-rose-500">
           <AlertTriangle className="h-5 w-5" />
-          <h3 className="text-sm font-bold">Zona Bahaya: Reset Workspace</h3>
+          <h3 className="text-sm font-bold">Zona Bahaya: Bersihkan Ruang Kerja</h3>
         </div>
-        <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
-          Tindakan ini akan mengosongkan seluruh data Anda (Goals, Jadwal, Kursus, Catatan, dan Berkas). Pastikan Anda telah melakukan ekspor backup jika masih membutuhkannya.
+        <p className="text-xs text-content-mutedLight dark:text-content-mutedDark leading-relaxed">
+          Tindakan ini akan mengosongkan seluruh target, agenda, kursus, catatan, dan berkas yang tersimpan.
         </p>
         <div className="pt-2">
           <Button
@@ -285,7 +307,7 @@ export default function SettingsPage() {
             className="gap-2 text-xs font-bold"
           >
             <Trash2 className="h-4 w-4" />
-            <span>Kosongkan Seluruh Data Workspace</span>
+            <span>Kosongkan Seluruh Data</span>
           </Button>
         </div>
       </div>
@@ -295,9 +317,9 @@ export default function SettingsPage() {
         isOpen={resetDialogOpen}
         onClose={() => setResetDialogOpen(false)}
         onConfirm={clearAllData}
-        title="Reset Seluruh Data Workspace?"
-        message="PERINGATAN: Semua target, jadwal, kursus, catatan, dan berkas di brankas akan dihapus bersih seketika. Apakah Anda yakin?"
-        confirmLabel="Ya, Hapus Semua Data"
+        title="Bersihkan Seluruh Data?"
+        message="PERINGATAN: Semua target, agenda, kursus, catatan, dan berkas akan dihapus seketika. Apakah Anda yakin?"
+        confirmLabel="Ya, Kosongkan Data"
         variant="danger"
       />
     </div>

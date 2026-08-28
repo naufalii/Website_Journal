@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from 'next';
 import './globals.css';
+import { ThemeProvider } from '@/context/ThemeContext';
 import { AuthProvider } from '@/context/AuthContext';
 import { AppProvider } from '@/context/AppContext';
 import { Sidebar } from '@/components/layout/Sidebar';
@@ -16,8 +17,8 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-  title: 'NexusWorkspace | All-in-One Personal Workspace & Productivity Dashboard',
-  description: 'Ruang kerja digital & dashboard produktivitas pribadi: Goals, Jadwal, Kursus, Catatan, dan Resource Vault tersinkronisasi multi-device dengan Supabase.',
+  title: 'NexusWorkspace | Personal Productivity OS',
+  description: 'Ruang kerja digital & dashboard produktivitas harian: Goals, Jadwal, Kursus, Catatan, dan Resource Vault.',
   applicationName: 'Nexus Workspace',
   appleWebApp: {
     capable: true,
@@ -36,33 +37,35 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="id">
-      <body className="min-h-screen bg-slate-50 dark:bg-[#0b0f19] text-slate-900 dark:text-slate-100 antialiased selection:bg-emerald-500 selection:text-white">
-        <AuthProvider>
-          <AppProvider>
-            <div className="flex min-h-screen">
-              {/* Desktop Sidebar */}
-              <Sidebar />
+    <html lang="id" className="dark">
+      <body className="bg-app-light dark:bg-app-dark text-content-primaryLight dark:text-content-primaryDark min-h-screen transition-colors duration-200 antialiased selection:bg-brand-primary selection:text-white">
+        <ThemeProvider>
+          <AuthProvider>
+            <AppProvider>
+              <div className="flex min-h-screen">
+                {/* Desktop Sidebar */}
+                <Sidebar />
 
-              {/* Main Content Area */}
-              <div className="flex-1 flex flex-col min-w-0 pb-20 md:pb-8">
-                <Header />
-                <main className="flex-1 p-4 sm:p-6 lg:p-8 max-w-7xl w-full mx-auto">
-                  {children}
-                </main>
+                {/* Main Content Area */}
+                <div className="flex-1 flex flex-col min-w-0 pb-24 md:pb-8">
+                  <Header />
+                  <main className="flex-1 p-4 sm:p-6 lg:p-8 max-w-7xl w-full mx-auto">
+                    {children}
+                  </main>
+                </div>
               </div>
-            </div>
 
-            {/* Mobile Bottom Navigation */}
-            <MobileNav />
+              {/* Mobile Floating Bottom Navigation */}
+              <MobileNav />
 
-            {/* Global Quick Action Modal */}
-            <QuickActionModal />
+              {/* Global Quick Action Modal */}
+              <QuickActionModal />
 
-            {/* Global Toast Alerts */}
-            <ToastContainer />
-          </AppProvider>
-        </AuthProvider>
+              {/* Global Toast Alerts */}
+              <ToastContainer />
+            </AppProvider>
+          </AuthProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

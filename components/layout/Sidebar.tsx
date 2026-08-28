@@ -14,11 +14,12 @@ import {
   Sparkles,
   PlusCircle,
   Download,
+  LogIn,
+  LogOut,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useApp } from '@/context/AppContext';
 import { useAuth } from '@/context/AuthContext';
-import { LogIn, LogOut, User as UserIcon } from 'lucide-react';
 
 const NAV_ITEMS = [
   { label: 'Dashboard', href: '/', icon: LayoutDashboard },
@@ -27,31 +28,33 @@ const NAV_ITEMS = [
   { label: 'Course & Skill', href: '/courses', icon: GraduationCap },
   { label: 'Catatan Cepat', href: '/notes', icon: FileText },
   { label: 'Resource Vault', href: '/vault', icon: FolderLock },
-  { label: 'Pengaturan & Backup', href: '/settings', icon: Settings },
+  { label: 'Pengaturan', href: '/settings', icon: Settings },
 ];
 
 export function Sidebar() {
   const pathname = usePathname();
-  const { openQuickAction, handleExport, goals, schedules, courses } = useApp();
+  const { openQuickAction, handleExport, goals, courses } = useApp();
   const { user, signOut } = useAuth();
 
-  // Quick stats for sidebar badges
   const todayGoalsCount = goals.length;
   const activeCoursesCount = courses.filter((c) => c.status === 'in_progress').length;
+  const userName = user?.email ? user.email.split('@')[0] : 'Pengguna';
 
   return (
-    <aside className="hidden md:flex flex-col w-64 border-r border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 h-screen sticky top-0 z-30 select-none">
+    <aside className="hidden md:flex flex-col w-64 border-r border-slate-200/60 dark:border-white/5 bg-surface-light dark:bg-surface-dark h-screen sticky top-0 z-30 select-none transition-colors duration-200">
       {/* Brand / Logo */}
-      <div className="p-6 border-b border-slate-100 dark:border-slate-800/80 flex items-center justify-between">
+      <div className="p-6 border-b border-slate-100 dark:border-white/5 flex items-center justify-between">
         <Link href="/" className="flex items-center gap-3 group">
-          <div className="h-10 w-10 rounded-xl bg-gradient-to-tr from-emerald-600 to-teal-500 flex items-center justify-center text-white shadow-md shadow-emerald-500/20 group-hover:scale-105 transition-transform duration-200">
+          <div className="h-10 w-10 rounded-2xl bg-gradient-to-tr from-brand-primary via-brand-vibrant to-brand-cyan flex items-center justify-center text-white shadow-soft group-hover:scale-105 transition-transform duration-200">
             <Sparkles className="h-5 w-5" />
           </div>
           <div>
-            <h1 className="font-bold text-sm text-slate-900 dark:text-white tracking-tight">
+            <h1 className="font-black text-sm text-content-primaryLight dark:text-content-primaryDark tracking-tight">
               NexusWorkspace
             </h1>
-            <p className="text-[11px] text-slate-400 font-medium">Personal OS & Dashboard</p>
+            <p className="text-[11px] text-content-mutedLight dark:text-content-mutedDark font-medium">
+              Personal Productivity OS
+            </p>
           </div>
         </Link>
       </div>
@@ -60,7 +63,7 @@ export function Sidebar() {
       <div className="px-4 pt-5 pb-2">
         <button
           onClick={() => openQuickAction()}
-          className="w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 active:scale-[0.98] text-white font-semibold text-xs shadow-md shadow-emerald-600/20 transition-all duration-150"
+          className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-2xl bg-brand-primary hover:bg-brand-deep active:scale-[0.98] text-white font-bold text-xs shadow-soft hover:shadow-glow transition-all duration-200"
         >
           <PlusCircle className="h-4 w-4" />
           <span>Tambah Cepat</span>
@@ -68,8 +71,8 @@ export function Sidebar() {
       </div>
 
       {/* Navigation Links */}
-      <nav className="flex-1 px-3 py-3 space-y-1 overflow-y-auto">
-        <div className="px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-slate-400">
+      <nav className="flex-1 px-3 py-3 space-y-1.5 overflow-y-auto">
+        <div className="px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-content-mutedLight dark:text-content-mutedDark">
           Menu Utama
         </div>
         {NAV_ITEMS.map((item) => {
@@ -81,10 +84,10 @@ export function Sidebar() {
               key={item.href}
               href={item.href}
               className={cn(
-                'flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all duration-150 group',
+                'flex items-center justify-between px-3.5 py-2.5 rounded-2xl text-xs font-bold transition-all duration-200 group',
                 isActive
-                  ? 'bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-300 font-bold'
-                  : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800/60 hover:text-slate-900 dark:hover:text-slate-100'
+                  ? 'bg-brand-primary text-white shadow-soft font-bold'
+                  : 'text-content-mutedLight dark:text-content-mutedDark hover:bg-surface-lightPill dark:hover:bg-surface-darkPill hover:text-content-primaryLight dark:hover:text-content-primaryDark'
               )}
             >
               <div className="flex items-center gap-3">
@@ -92,8 +95,8 @@ export function Sidebar() {
                   className={cn(
                     'h-4 w-4 transition-colors',
                     isActive
-                      ? 'text-emerald-600 dark:text-emerald-400'
-                      : 'text-slate-400 group-hover:text-slate-700 dark:group-hover:text-slate-200'
+                      ? 'text-white'
+                      : 'text-content-mutedLight dark:text-content-mutedDark group-hover:text-brand-primary dark:group-hover:text-brand-vibrant'
                   )}
                 />
                 <span>{item.label}</span>
@@ -101,12 +104,26 @@ export function Sidebar() {
 
               {/* Badges */}
               {item.href === '/goals' && todayGoalsCount > 0 && (
-                <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 font-medium">
+                <span
+                  className={cn(
+                    'text-[10px] px-2 py-0.5 rounded-full font-bold',
+                    isActive
+                      ? 'bg-white/20 text-white'
+                      : 'bg-surface-lightPill dark:bg-surface-darkPill text-content-primaryLight dark:text-content-primaryDark'
+                  )}
+                >
                   {todayGoalsCount}
                 </span>
               )}
               {item.href === '/courses' && activeCoursesCount > 0 && (
-                <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-900/60 text-emerald-700 dark:text-emerald-300 font-medium">
+                <span
+                  className={cn(
+                    'text-[10px] px-2 py-0.5 rounded-full font-bold',
+                    isActive
+                      ? 'bg-white/20 text-white'
+                      : 'bg-brand-primary/10 text-brand-primary dark:text-brand-vibrant'
+                  )}
+                >
                   {activeCoursesCount} aktif
                 </span>
               )}
@@ -116,26 +133,29 @@ export function Sidebar() {
       </nav>
 
       {/* Footer User Profile & Quick Backup Action */}
-      <div className="p-3 border-t border-slate-100 dark:border-slate-800/80 bg-slate-50/50 dark:bg-slate-900/50 space-y-2">
+      <div className="p-3.5 border-t border-slate-100 dark:border-white/5 bg-app-light/50 dark:bg-app-dark/30 space-y-2">
         {user ? (
-          <div className="flex items-center justify-between p-2 rounded-xl bg-white dark:bg-slate-800 border border-slate-200/80 dark:border-slate-700">
-            <div className="flex items-center gap-2 min-w-0">
-              <div className="h-7 w-7 rounded-lg bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 flex items-center justify-center font-bold text-xs flex-shrink-0">
-                {user.email?.[0].toUpperCase() || 'U'}
+          <div className="flex items-center justify-between p-2.5 rounded-2xl bg-surface-light dark:bg-surface-dark border border-slate-200/60 dark:border-white/5 shadow-soft">
+            <div className="flex items-center gap-2.5 min-w-0">
+              <div className="h-8 w-8 rounded-full bg-gradient-to-tr from-brand-primary to-brand-vibrant text-white font-bold text-xs flex items-center justify-center flex-shrink-0 shadow-soft">
+                {userName[0].toUpperCase()}
               </div>
               <div className="min-w-0">
-                <p className="text-[11px] font-bold text-slate-900 dark:text-white truncate">
-                  {user.email}
+                <p className="text-xs font-bold text-content-primaryLight dark:text-content-primaryDark truncate capitalize">
+                  {userName}
                 </p>
-                <span className="text-[9px] text-emerald-600 dark:text-emerald-400 font-medium">
-                  ● Cloud Synced
-                </span>
+                <div className="flex items-center gap-1.5 mt-0.5">
+                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                  <span className="text-[10px] text-content-mutedLight dark:text-content-mutedDark font-medium">
+                    Akun Aktif
+                  </span>
+                </div>
               </div>
             </div>
             <button
               onClick={() => signOut()}
-              className="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition-colors"
-              title="Logout"
+              className="p-1.5 rounded-xl text-content-mutedLight dark:text-content-mutedDark hover:text-rose-500 hover:bg-rose-500/10 transition-colors"
+              title="Keluar"
             >
               <LogOut className="h-3.5 w-3.5" />
             </button>
@@ -143,22 +163,22 @@ export function Sidebar() {
         ) : (
           <Link
             href="/login"
-            className="flex items-center justify-center gap-2 p-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition-colors shadow-sm"
+            className="flex items-center justify-center gap-2 p-2.5 rounded-2xl bg-brand-primary hover:bg-brand-deep text-white text-xs font-bold transition-all shadow-soft"
           >
             <LogIn className="h-3.5 w-3.5" />
-            <span>Login Akun Supabase</span>
+            <span>Masuk / Login</span>
           </Link>
         )}
 
         <button
           onClick={() => handleExport()}
-          className="w-full flex items-center justify-between p-2 rounded-xl border border-slate-200 dark:border-slate-700/80 bg-white dark:bg-slate-800/80 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200 transition-colors text-xs font-medium"
+          className="w-full flex items-center justify-between p-2.5 rounded-2xl border border-slate-200/60 dark:border-white/5 bg-surface-light dark:bg-surface-dark hover:bg-surface-lightPill dark:hover:bg-surface-darkPill text-content-primaryLight dark:text-content-primaryDark transition-colors text-xs font-semibold"
         >
           <div className="flex items-center gap-2">
-            <Download className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400" />
-            <span>Backup Data (.json)</span>
+            <Download className="h-3.5 w-3.5 text-brand-primary dark:text-brand-vibrant" />
+            <span>Cadangkan Data</span>
           </div>
-          <span className="text-[10px] text-slate-400">Save</span>
+          <span className="text-[10px] text-content-mutedLight dark:text-content-mutedDark">JSON</span>
         </button>
       </div>
     </aside>

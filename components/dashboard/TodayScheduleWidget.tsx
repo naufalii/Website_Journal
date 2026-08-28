@@ -2,106 +2,124 @@
 
 import React from 'react';
 import { useApp } from '@/context/AppContext';
-import { Calendar, Clock, CheckCircle2, Circle, ArrowRight } from 'lucide-react';
+import { Calendar, Clock, CheckCircle2, Circle, ArrowRight, MapPin, ExternalLink } from 'lucide-react';
 import { getLocalDateString } from '@/lib/utils';
 import { Badge } from '@/components/ui/Badge';
 import { EmptyState } from '@/components/ui/EmptyState';
 import Link from 'next/link';
 
-export function TodayScheduleWidget() {
-  const { schedules, toggleScheduleComplete, openQuickAction } = useApp();
-  const todayStr = getLocalDateString();
+interface TodayScheduleWidgetProps {
+  selectedDate?: string;
+}
 
-  const todaySchedules = schedules
-    .filter((s) => s.date === todayStr)
+export function TodayScheduleWidget({ selectedDate }: TodayScheduleWidgetProps) {
+  const { schedules, toggleScheduleComplete, openQuickAction } = useApp();
+  const dateToView = selectedDate || getLocalDateString();
+
+  const daySchedules = schedules
+    .filter((s) => s.date === dateToView)
     .sort((a, b) => a.startTime.localeCompare(b.startTime));
 
   const priorityBadges = {
     high: <Badge variant="danger">High</Badge>,
     medium: <Badge variant="warning">Medium</Badge>,
-    low: <Badge variant="success">Low</Badge>,
+    low: <Badge variant="cyan">Low</Badge>,
   };
 
   return (
-    <div className="flex flex-col p-6 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-sm">
+    <div className="flex flex-col p-6 rounded-3xl bg-surface-light dark:bg-surface-dark border border-slate-100 dark:border-white/5 shadow-soft">
       {/* Header */}
-      <div className="flex items-center justify-between mb-4">
+      <div className="flex items-center justify-between mb-5">
         <div className="flex items-center gap-2.5">
-          <div className="p-2 rounded-xl bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400">
+          <div className="p-2 rounded-2xl bg-surface-lightPill dark:bg-surface-darkPill text-brand-primary dark:text-brand-vibrant">
             <Calendar className="h-5 w-5" />
           </div>
           <div>
-            <h3 className="text-sm font-bold text-slate-900 dark:text-white">Agenda Hari Ini</h3>
-            <p className="text-xs text-slate-400">Timeline jadwal & aktivitas terdekat</p>
+            <h3 className="text-sm font-bold text-content-primaryLight dark:text-content-primaryDark">
+              Timeline Agenda
+            </h3>
+            <p className="text-xs text-content-mutedLight dark:text-content-mutedDark">
+              {daySchedules.length} aktivitas terencana
+            </p>
           </div>
         </div>
 
         <Link
           href="/schedule"
-          className="inline-flex items-center gap-1 text-xs font-semibold text-emerald-600 dark:text-emerald-400 hover:underline"
+          className="inline-flex items-center gap-1 text-xs font-bold text-brand-primary dark:text-brand-vibrant hover:underline"
         >
-          <span>Semua Jadwal</span>
+          <span>Buka Agenda</span>
           <ArrowRight className="h-3.5 w-3.5" />
         </Link>
       </div>
 
-      {todaySchedules.length === 0 ? (
+      {daySchedules.length === 0 ? (
         <EmptyState
           icon={<Calendar className="h-6 w-6" />}
-          title="Tidak Ada Jadwal Hari Ini"
-          description="Hari ini agenda Anda masih kosong. Tambahkan jadwal aktivitas penting Anda."
+          title="Tidak Ada Jadwal"
+          description="Belum ada agenda pada tanggal ini. Tambahkan aktivitas untuk mengatur waktumu."
           actionLabel="Tambah Agenda"
           onAction={() => openQuickAction('schedule')}
-          className="py-6"
+          className="py-6 border-0 bg-transparent"
         />
       ) : (
         <div className="space-y-3 flex-1">
-          {todaySchedules.slice(0, 4).map((item) => (
+          {daySchedules.map((item) => (
             <div
               key={item.id}
-              onClick={() => toggleScheduleComplete(item.id)}
-              className={`flex items-start justify-between p-3.5 rounded-2xl border transition-all cursor-pointer select-none ${
-                item.completed
-                  ? 'bg-slate-50/70 dark:bg-slate-800/30 border-slate-200/50 opacity-60'
-                  : 'bg-white dark:bg-slate-800/60 border-slate-200/80 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700'
+              className={`flex items-center gap-4 transition-all duration-200 ${
+                item.completed ? 'opacity-50' : 'opacity-100'
               }`}
             >
-              <div className="flex items-start gap-3 min-w-0">
-                <button
-                  type="button"
-                  className="mt-0.5 flex-shrink-0 focus:outline-none"
-                >
-                  {item.completed ? (
-                    <CheckCircle2 className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
-                  ) : (
-                    <Circle className="h-4 w-4 text-slate-300 dark:text-slate-600" />
-                  )}
-                </button>
+              {/* Left Time Column */}
+              <div className="w-16 flex-shrink-0 text-right">
+                <span className="font-mono text-xs font-bold text-content-primaryLight dark:text-content-primaryDark">
+                  {item.startTime}
+                </span>
+                <p className="font-mono text-[10px] text-content-mutedLight dark:text-content-mutedDark">
+                  {item.endTime}
+                </p>
+              </div>
 
-                <div className="min-w-0">
-                  <h4
-                    className={`text-xs font-bold truncate ${
-                      item.completed
-                        ? 'line-through text-slate-400 dark:text-slate-500'
-                        : 'text-slate-800 dark:text-slate-100'
-                    }`}
-                  >
-                    {item.title}
-                  </h4>
-                  <div className="flex items-center gap-2 mt-1 text-[11px] text-slate-500 dark:text-slate-400">
-                    <span className="flex items-center gap-1 font-medium font-mono">
-                      <Clock className="h-3 w-3 text-slate-400" />
-                      {item.startTime} - {item.endTime}
-                    </span>
+              {/* Center Dot Indicator */}
+              <div className="flex flex-col items-center self-stretch justify-center">
+                <div className="h-2.5 w-2.5 rounded-full bg-brand-cyan shadow-glow flex-shrink-0" />
+                <div className="w-0.5 flex-1 bg-slate-200 dark:bg-slate-800 my-1" />
+              </div>
+
+              {/* Task Pill Container */}
+              <div
+                onClick={() => toggleScheduleComplete(item.id)}
+                className={`flex-1 p-3.5 rounded-2xl bg-surface-lightPill dark:bg-surface-darkPill hover:bg-slate-200 dark:hover:bg-slate-700/60 transition-all cursor-pointer select-none flex items-center justify-between gap-3`}
+              >
+                <div className="flex items-center gap-2.5 min-w-0">
+                  <button type="button" className="flex-shrink-0 focus:outline-none">
+                    {item.completed ? (
+                      <CheckCircle2 className="h-4 w-4 text-emerald-500" />
+                    ) : (
+                      <Circle className="h-4 w-4 text-content-mutedLight dark:text-content-mutedDark" />
+                    )}
+                  </button>
+
+                  <div className="min-w-0">
+                    <h4
+                      className={`text-xs font-bold truncate ${
+                        item.completed
+                          ? 'line-through text-content-mutedLight dark:text-content-mutedDark'
+                          : 'text-content-primaryLight dark:text-content-primaryDark'
+                      }`}
+                    >
+                      {item.title}
+                    </h4>
                     {item.locationOrLink && (
-                      <span className="truncate max-w-[120px]">• {item.locationOrLink}</span>
+                      <p className="text-[10px] text-content-mutedLight dark:text-content-mutedDark truncate mt-0.5">
+                        📍 {item.locationOrLink}
+                      </p>
                     )}
                   </div>
                 </div>
-              </div>
 
-              <div className="flex-shrink-0 ml-2">
-                {priorityBadges[item.priority]}
+                <div className="flex-shrink-0">{priorityBadges[item.priority]}</div>
               </div>
             </div>
           ))}

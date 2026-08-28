@@ -5,9 +5,9 @@ import { Modal } from '@/components/ui/Modal';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Select } from '@/components/ui/Select';
-import { VaultCategory, VaultType } from '@/lib/types';
+import { VaultCategory } from '@/lib/types';
 import { useApp } from '@/context/AppContext';
-import { Link as LinkIcon, Upload, ShieldCheck } from 'lucide-react';
+import { Upload, Link as LinkIcon } from 'lucide-react';
 
 interface VaultModalProps {
   isOpen: boolean;
@@ -17,7 +17,7 @@ interface VaultModalProps {
 export function VaultModal({ isOpen, onClose }: VaultModalProps) {
   const { addVaultLink, addVaultFile } = useApp();
 
-  const [type, setType] = useState<VaultType>('link');
+  const [type, setType] = useState<'link' | 'file'>('file');
   const [title, setTitle] = useState('');
   const [category, setCategory] = useState<VaultCategory>('document');
   const [url, setUrl] = useState('');
@@ -29,7 +29,6 @@ export function VaultModal({ isOpen, onClose }: VaultModalProps) {
     setUrl('');
     setFile(null);
     setCategory('document');
-    setIsSubmitting(false);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -59,8 +58,6 @@ export function VaultModal({ isOpen, onClose }: VaultModalProps) {
       }
       resetForm();
       onClose();
-    } catch (err) {
-      console.error(err);
     } finally {
       setIsSubmitting(false);
     }
@@ -70,42 +67,42 @@ export function VaultModal({ isOpen, onClose }: VaultModalProps) {
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      title="Tambah Dokumen / Resource ke Vault"
-      description="Simpan link penting atau simpan file lokal ke IndexedDB dengan aman tanpa batasan LocalStorage."
-      maxWidth="lg"
+      title="Simpan ke Resource Vault"
+      description="Simpan berkas dokumen, sertifikat, atau tautan referensi penting."
+      maxWidth="md"
     >
       <form onSubmit={handleSubmit} className="space-y-4">
-        {/* Type Selector */}
-        <div className="grid grid-cols-2 gap-3 mb-2">
-          <button
-            type="button"
-            onClick={() => setType('link')}
-            className={`flex items-center justify-center gap-2 p-3 rounded-xl border text-xs font-bold transition-all ${
-              type === 'link'
-                ? 'border-emerald-500 bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 ring-2 ring-emerald-500/20'
-                : 'border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800'
-            }`}
-          >
-            <LinkIcon className="h-4 w-4" />
-            <span>Tautan / URL Eksternal</span>
-          </button>
+        {/* Type Toggle */}
+        <div className="flex gap-2 p-1 rounded-2xl bg-surface-lightPill dark:bg-surface-darkPill">
           <button
             type="button"
             onClick={() => setType('file')}
-            className={`flex items-center justify-center gap-2 p-3 rounded-xl border text-xs font-bold transition-all ${
+            className={`flex-1 py-2 px-3 rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition-all ${
               type === 'file'
-                ? 'border-emerald-500 bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 ring-2 ring-emerald-500/20'
-                : 'border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800'
+                ? 'bg-surface-light dark:bg-surface-dark text-brand-primary dark:text-brand-vibrant shadow-soft'
+                : 'text-content-mutedLight dark:text-content-mutedDark hover:text-content-primaryLight'
             }`}
           >
             <Upload className="h-4 w-4" />
-            <span>Upload Berkas Lokal (IndexedDB)</span>
+            <span>Upload Berkas File</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => setType('link')}
+            className={`flex-1 py-2 px-3 rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition-all ${
+              type === 'link'
+                ? 'bg-surface-light dark:bg-surface-dark text-brand-primary dark:text-brand-vibrant shadow-soft'
+                : 'text-content-mutedLight dark:text-content-mutedDark hover:text-content-primaryLight'
+            }`}
+          >
+            <LinkIcon className="h-4 w-4" />
+            <span>Tautan Link</span>
           </button>
         </div>
 
         <Input
-          label="Judul Resource"
-          placeholder="Contoh: Salinan Polis Asuransi, Repository Template, Sertifikat AWS"
+          label="Nama Dokumen / Resource"
+          placeholder="Contoh: Salinan KTP, Ijazah, Link Drive Materi"
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           required
@@ -117,44 +114,35 @@ export function VaultModal({ isOpen, onClose }: VaultModalProps) {
           value={category}
           onChange={(e) => setCategory(e.target.value as VaultCategory)}
         >
-          <option value="document">📄 Dokumen & Surat</option>
-          <option value="learning">🎓 Ebook & Bahan Belajar</option>
-          <option value="certificate">🏆 Sertifikat & Portofolio</option>
-          <option value="work">💼 Pekerjaan & Proyek</option>
-          <option value="finance">💰 Keuangan & Bukti Bayar</option>
-          <option value="personal">🔒 Dokumen Personal</option>
-          <option value="other">📦 Lainnya</option>
+          <option value="document">Dokumen / Surat Resmi</option>
+          <option value="learning">Pembelajaran & Ebook</option>
+          <option value="certificate">Sertifikat & Piagam</option>
+          <option value="work">Pekerjaan & Proyek</option>
+          <option value="finance">Finansial & Tagihan</option>
+          <option value="personal">Personal / Pribadi</option>
+          <option value="other">Lainnya</option>
         </Select>
 
         {type === 'link' ? (
           <Input
-            label="URL / Link Eksternal"
+            label="URL / Tautan Link"
             type="url"
-            placeholder="https://drive.google.com/... atau https://github.com/..."
+            placeholder="https://drive.google.com/... atau https://..."
             value={url}
             onChange={(e) => setUrl(e.target.value)}
             required
           />
         ) : (
-          <div className="space-y-2 p-4 rounded-xl border border-dashed border-emerald-300 dark:border-emerald-800 bg-emerald-50/40 dark:bg-emerald-950/20">
-            <div className="flex items-center gap-2 text-xs font-semibold text-emerald-800 dark:text-emerald-300">
-              <ShieldCheck className="h-4 w-4 text-emerald-600" />
-              <span>Penyimpanan Aman di IndexedDB Browser</span>
-            </div>
-            <p className="text-[11px] text-slate-500 dark:text-slate-400">
-              File Anda disimpan langsung di browser Anda secara privat dan tidak diunggah ke server mana pun.
-            </p>
+          <div className="space-y-1.5">
+            <label className="block text-[11px] font-bold uppercase tracking-wider text-content-mutedLight dark:text-content-mutedDark">
+              Pilih Berkas File
+            </label>
             <input
               type="file"
               onChange={(e) => setFile(e.target.files?.[0] || null)}
-              className="w-full text-xs text-slate-600 file:mr-4 file:py-2.5 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-emerald-600 file:text-white hover:file:bg-emerald-700 cursor-pointer pt-2"
+              className="w-full text-xs text-content-mutedLight dark:text-content-mutedDark file:mr-4 file:py-2.5 file:px-4 file:rounded-2xl file:border-0 file:text-xs file:font-bold file:bg-brand-primary/10 file:text-brand-primary dark:file:text-brand-vibrant hover:file:bg-brand-primary/20 cursor-pointer"
               required
             />
-            {file && (
-              <p className="text-xs text-emerald-600 dark:text-emerald-400 font-medium">
-                File terpilih: {file.name} ({(file.size / 1024).toFixed(1)} KB)
-              </p>
-            )}
           </div>
         )}
 
@@ -162,8 +150,8 @@ export function VaultModal({ isOpen, onClose }: VaultModalProps) {
           <Button variant="outline" size="sm" onClick={onClose} disabled={isSubmitting}>
             Batal
           </Button>
-          <Button type="submit" size="sm" disabled={isSubmitting}>
-            {isSubmitting ? 'Menyimpan...' : 'Simpan Resource'}
+          <Button type="submit" size="sm" disabled={isSubmitting} className="shadow-glow">
+            {isSubmitting ? 'Mengunggah...' : 'Simpan Resource'}
           </Button>
         </div>
       </form>

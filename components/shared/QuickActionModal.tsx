@@ -191,12 +191,12 @@ export function QuickActionModal() {
     <Modal
       isOpen={isQuickActionOpen}
       onClose={closeQuickAction}
-      title="Tambah Cepat (+ Quick Action)"
-      description="Pilih modul dan masukkan data baru tanpa harus berpindah halaman."
+      title="Tambah Data Cepat"
+      description="Pilih modul dan buat data baru secara instan."
       maxWidth="lg"
     >
       {/* Module Selector Tabs */}
-      <div className="flex border-b border-slate-200 dark:border-slate-800 -mx-6 px-6 mb-5 overflow-x-auto gap-2">
+      <div className="flex border-b border-slate-100 dark:border-white/5 -mx-6 px-6 mb-5 overflow-x-auto gap-2">
         {tabs.map((tab) => {
           const Icon = tab.icon;
           const isSelected = activeTab === tab.id;
@@ -204,10 +204,10 @@ export function QuickActionModal() {
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`flex items-center gap-2 pb-3 px-2 border-b-2 text-xs font-bold transition-all whitespace-nowrap ${
+              className={`flex items-center gap-2 pb-3 px-3 border-b-2 text-xs font-bold transition-all whitespace-nowrap ${
                 isSelected
-                  ? 'border-emerald-500 text-emerald-600 dark:text-emerald-400'
-                  : 'border-transparent text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'
+                  ? 'border-brand-primary text-brand-primary dark:text-brand-vibrant'
+                  : 'border-transparent text-content-mutedLight dark:text-content-mutedDark hover:text-content-primaryLight'
               }`}
             >
               <Icon className="h-4 w-4" />
@@ -244,8 +244,8 @@ export function QuickActionModal() {
             <Button variant="outline" size="sm" onClick={closeQuickAction}>
               Batal
             </Button>
-            <Button type="submit" size="sm">
-              Simpan Goal
+            <Button type="submit" size="sm" className="shadow-glow">
+              Simpan Target
             </Button>
           </div>
         </form>
@@ -303,9 +303,9 @@ export function QuickActionModal() {
               value={schedPriority}
               onChange={(e) => setSchedPriority(e.target.value as Priority)}
             >
-              <option value="high">High Priority 🔴</option>
-              <option value="medium">Medium Priority 🟡</option>
-              <option value="low">Low Priority 🟢</option>
+              <option value="high">High Priority</option>
+              <option value="medium">Medium Priority</option>
+              <option value="low">Low Priority</option>
             </Select>
           </div>
           <Textarea
@@ -319,7 +319,7 @@ export function QuickActionModal() {
             <Button variant="outline" size="sm" onClick={closeQuickAction}>
               Batal
             </Button>
-            <Button type="submit" size="sm">
+            <Button type="submit" size="sm" className="shadow-glow">
               Simpan Agenda
             </Button>
           </div>
@@ -391,7 +391,7 @@ export function QuickActionModal() {
             <Button variant="outline" size="sm" onClick={closeQuickAction}>
               Batal
             </Button>
-            <Button type="submit" size="sm">
+            <Button type="submit" size="sm" className="shadow-glow">
               Simpan Kursus
             </Button>
           </div>
@@ -440,7 +440,7 @@ export function QuickActionModal() {
             <Button variant="outline" size="sm" onClick={closeQuickAction}>
               Batal
             </Button>
-            <Button type="submit" size="sm">
+            <Button type="submit" size="sm" className="shadow-glow">
               Simpan Catatan
             </Button>
           </div>
@@ -454,10 +454,10 @@ export function QuickActionModal() {
             <button
               type="button"
               onClick={() => setVaultType('link')}
-              className={`flex-1 py-2 px-3 rounded-xl border text-xs font-bold flex items-center justify-center gap-2 transition-all ${
+              className={`flex-1 py-2 px-3 rounded-2xl border text-xs font-bold flex items-center justify-center gap-2 transition-all ${
                 vaultType === 'link'
-                  ? 'border-emerald-500 bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300'
-                  : 'border-slate-200 dark:border-slate-700 text-slate-600'
+                  ? 'border-brand-primary bg-brand-primary/10 text-brand-primary dark:text-brand-vibrant'
+                  : 'border-slate-200 dark:border-white/10 text-content-mutedLight dark:text-content-mutedDark'
               }`}
             >
               <LinkIcon className="h-4 w-4" />
@@ -466,14 +466,14 @@ export function QuickActionModal() {
             <button
               type="button"
               onClick={() => setVaultType('file')}
-              className={`flex-1 py-2 px-3 rounded-xl border text-xs font-bold flex items-center justify-center gap-2 transition-all ${
+              className={`flex-1 py-2 px-3 rounded-2xl border text-xs font-bold flex items-center justify-center gap-2 transition-all ${
                 vaultType === 'file'
-                  ? 'border-emerald-500 bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300'
-                  : 'border-slate-200 dark:border-slate-700 text-slate-600'
+                  ? 'border-brand-primary bg-brand-primary/10 text-brand-primary dark:text-brand-vibrant'
+                  : 'border-slate-200 dark:border-white/10 text-content-mutedLight dark:text-content-mutedDark'
               }`}
             >
               <Upload className="h-4 w-4" />
-              <span>Upload File Lokal</span>
+              <span>Upload Berkas File</span>
             </button>
           </div>
 
@@ -491,33 +491,33 @@ export function QuickActionModal() {
             value={vaultCategory}
             onChange={(e) => setVaultCategory(e.target.value as VaultCategory)}
           >
-            <option value="document">📄 Dokumen / Surat</option>
-            <option value="learning">🎓 Pembelajaran & Ebook</option>
-            <option value="certificate">🏆 Sertifikat & Piagam</option>
-            <option value="work">💼 Pekerjaan & Proyek</option>
-            <option value="finance">💰 Finansial & Tagihan</option>
-            <option value="personal">🔒 Pribadi</option>
-            <option value="other">📦 Lainnya</option>
+            <option value="document">Dokumen / Surat</option>
+            <option value="learning">Pembelajaran & Ebook</option>
+            <option value="certificate">Sertifikat & Piagam</option>
+            <option value="work">Pekerjaan & Proyek</option>
+            <option value="finance">Finansial & Tagihan</option>
+            <option value="personal">Pribadi</option>
+            <option value="other">Lainnya</option>
           </Select>
 
           {vaultType === 'link' ? (
             <Input
               label="URL / Link Eksternal"
               type="url"
-              placeholder="https://drive.google.com/... atau https://notion.so/..."
+              placeholder="https://drive.google.com/... atau https://..."
               value={vaultUrl}
               onChange={(e) => setVaultUrl(e.target.value)}
               required
             />
           ) : (
             <div className="space-y-1.5">
-              <label className="block text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-300">
-                Pilih File (PDF, Gambar, Docs - Aman di IndexedDB)
+              <label className="block text-[11px] font-bold uppercase tracking-wider text-content-mutedLight dark:text-content-mutedDark">
+                Pilih File (PDF, Gambar, Docs)
               </label>
               <input
                 type="file"
                 onChange={(e) => setVaultFile(e.target.files?.[0] || null)}
-                className="w-full text-xs text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-emerald-50 file:text-emerald-700 hover:file:bg-emerald-100 cursor-pointer"
+                className="w-full text-xs text-content-mutedLight dark:text-content-mutedDark file:mr-4 file:py-2.5 file:px-4 file:rounded-2xl file:border-0 file:text-xs file:font-bold file:bg-brand-primary/10 file:text-brand-primary dark:file:text-brand-vibrant hover:file:bg-brand-primary/20 cursor-pointer"
                 required
               />
             </div>
@@ -527,7 +527,7 @@ export function QuickActionModal() {
             <Button variant="outline" size="sm" onClick={closeQuickAction}>
               Batal
             </Button>
-            <Button type="submit" size="sm">
+            <Button type="submit" size="sm" className="shadow-glow">
               Simpan Resource
             </Button>
           </div>

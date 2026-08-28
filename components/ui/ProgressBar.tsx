@@ -8,7 +8,7 @@ export interface ProgressBarProps {
   className?: string;
   barClassName?: string;
   size?: 'sm' | 'md' | 'lg';
-  color?: 'emerald' | 'blue' | 'indigo' | 'amber' | 'purple';
+  color?: 'brand' | 'cyan' | 'emerald' | 'amber';
 }
 
 export function ProgressBar({
@@ -18,33 +18,32 @@ export function ProgressBar({
   className,
   barClassName,
   size = 'md',
-  color = 'emerald',
+  color = 'brand',
 }: ProgressBarProps) {
   const percentage = Math.min(100, Math.max(0, Math.round((value / max) * 100))) || 0;
 
   const heights = {
     sm: 'h-1.5',
     md: 'h-2.5',
-    lg: 'h-4',
+    lg: 'h-3.5',
   };
 
   const colors = {
-    emerald: 'bg-gradient-to-r from-emerald-500 to-teal-500',
-    blue: 'bg-gradient-to-r from-blue-500 to-cyan-500',
-    indigo: 'bg-gradient-to-r from-indigo-500 to-purple-500',
-    amber: 'bg-gradient-to-r from-amber-500 to-orange-500',
-    purple: 'bg-gradient-to-r from-purple-500 to-pink-500',
+    brand: 'bg-gradient-to-r from-brand-primary to-brand-cyan',
+    cyan: 'bg-gradient-to-r from-cyan-500 to-teal-400',
+    emerald: 'bg-gradient-to-r from-emerald-500 to-teal-400',
+    amber: 'bg-gradient-to-r from-amber-500 to-orange-400',
   };
 
   return (
     <div className={cn('w-full', className)}>
       {showPercentage && (
-        <div className="flex justify-between items-center text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1.5">
-          <span>Progress</span>
+        <div className="flex justify-between items-center text-xs font-bold text-content-primaryLight dark:text-content-primaryDark mb-1.5">
+          <span>Progres</span>
           <span>{percentage}%</span>
         </div>
       )}
-      <div className={cn('w-full bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden p-0.5', heights[size])}>
+      <div className={cn('w-full bg-surface-lightPill dark:bg-surface-darkPill rounded-full overflow-hidden p-0.5', heights[size])}>
         <div
           className={cn('h-full rounded-full transition-all duration-500 ease-out', colors[color], barClassName)}
           style={{ width: `${percentage}%` }}

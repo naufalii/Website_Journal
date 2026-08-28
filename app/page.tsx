@@ -1,32 +1,38 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import { GreetingBanner } from '@/components/dashboard/GreetingBanner';
-import { SupabaseSetupBanner } from '@/components/shared/SupabaseSetupBanner';
 import { StatCards } from '@/components/dashboard/StatCards';
+import { HorizontalDateStrip } from '@/components/dashboard/HorizontalDateStrip';
 import { TodayGoalsWidget } from '@/components/dashboard/TodayGoalsWidget';
 import { TodayScheduleWidget } from '@/components/dashboard/TodayScheduleWidget';
 import { ActiveCoursesWidget } from '@/components/dashboard/ActiveCoursesWidget';
 import { RecentNotesWidget } from '@/components/dashboard/RecentNotesWidget';
+import { getLocalDateString } from '@/lib/utils';
 
 export default function DashboardPage() {
-  return (
-    <div className="space-y-6 sm:space-y-8 animate-in fade-in duration-300">
-      {/* Supabase Connection / Auth Banner */}
-      <SupabaseSetupBanner />
+  const [selectedDate, setSelectedDate] = useState<string>(getLocalDateString());
 
-      {/* Dynamic Greeting & Live Banner */}
+  return (
+    <div className="space-y-6 sm:space-y-7 animate-in fade-in duration-300">
+      {/* Friendly Greeting Header */}
       <GreetingBanner />
 
-      {/* Overview Stat Cards */}
+      {/* 2x2 Metrics Summary Grid */}
       <StatCards />
 
-      {/* Two Column Dashboard Grid */}
+      {/* Horizontal 7-Day Calendar Strip */}
+      <HorizontalDateStrip
+        selectedDate={selectedDate}
+        onSelectDate={(newDate) => setSelectedDate(newDate)}
+      />
+
+      {/* Two Column Widget Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Left Column: Goals & Schedule */}
+        {/* Left Column: Goals & Schedule for Selected Date */}
         <div className="space-y-6">
-          <TodayGoalsWidget />
-          <TodayScheduleWidget />
+          <TodayGoalsWidget selectedDate={selectedDate} />
+          <TodayScheduleWidget selectedDate={selectedDate} />
         </div>
 
         {/* Right Column: Courses & Notes */}

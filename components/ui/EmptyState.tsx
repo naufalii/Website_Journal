@@ -23,21 +23,21 @@ export function EmptyState({
   return (
     <div
       className={cn(
-        'flex flex-col items-center justify-center p-8 sm:p-12 text-center rounded-2xl border-2 border-dashed border-slate-200 dark:border-slate-800 bg-white/50 dark:bg-slate-900/40 transition-all',
+        'flex flex-col items-center justify-center p-8 sm:p-12 text-center rounded-3xl border border-dashed border-slate-200 dark:border-white/10 bg-surface-light/40 dark:bg-surface-dark/40 transition-all',
         className
       )}
     >
-      <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 mb-4 shadow-sm">
+      <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-brand-primary/10 text-brand-primary dark:text-brand-vibrant mb-4 shadow-soft">
         {icon}
       </div>
-      <h4 className="text-base font-bold text-slate-800 dark:text-slate-200 mb-1.5">{title}</h4>
-      <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 max-w-sm mb-6 leading-relaxed">
+      <h4 className="text-base font-bold text-content-primaryLight dark:text-content-primaryDark mb-1.5">{title}</h4>
+      <p className="text-xs sm:text-sm text-content-mutedLight dark:text-content-mutedDark max-w-sm mb-6 leading-relaxed">
         {description}
       </p>
       {actionLabel && onAction && (
-        <Button onClick={onAction} size="sm" className="shadow-md">
+        <Button onClick={onAction} size="sm">
           <Plus className="h-4 w-4" />
-          {actionLabel}
+          <span>{actionLabel}</span>
         </Button>
       )}
     </div>

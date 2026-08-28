@@ -14,63 +14,46 @@ import {
   Trash2,
   Filter,
 } from 'lucide-react';
-import { ScheduleItem, Priority, ScheduleCategory } from '@/lib/types';
-import { getLocalDateString, formatDateIndo, formatShortDate } from '@/lib/utils';
+import { ScheduleItem } from '@/lib/types';
+import { getLocalDateString, formatShortDate } from '@/lib/utils';
 import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
 import { EmptyState } from '@/components/ui/EmptyState';
+import { HorizontalDateStrip } from '@/components/dashboard/HorizontalDateStrip';
 import { ScheduleModal } from '@/components/schedule/ScheduleModal';
 import { ConfirmDialog } from '@/components/shared/ConfirmDialog';
 
 export default function SchedulePage() {
   const { schedules, toggleScheduleComplete, deleteSchedule } = useApp();
 
-  const [dateFilter, setDateFilter] = useState<'today' | 'tomorrow' | 'week' | 'all'>('today');
+  const [selectedDate, setSelectedDate] = useState<string>(getLocalDateString());
   const [priorityFilter, setPriorityFilter] = useState<string>('all');
   const [modalOpen, setModalOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<ScheduleItem | null>(null);
   const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null);
 
-  const todayStr = getLocalDateString();
-  
-  const tomorrowDate = new Date();
-  tomorrowDate.setDate(tomorrowDate.getDate() + 1);
-  const tomorrowStr = getLocalDateString(tomorrowDate);
-
-  const nextWeekDate = new Date();
-  nextWeekDate.setDate(nextWeekDate.getDate() + 7);
-  const nextWeekStr = getLocalDateString(nextWeekDate);
-
-  // Filter schedules
-  const filteredSchedules = schedules.filter((item) => {
-    // Date filter
-    if (dateFilter === 'today' && item.date !== todayStr) return false;
-    if (dateFilter === 'tomorrow' && item.date !== tomorrowStr) return false;
-    if (dateFilter === 'week' && (item.date < todayStr || item.date > nextWeekStr)) return false;
-
-    // Priority filter
-    if (priorityFilter !== 'all' && item.priority !== priorityFilter) return false;
-
-    return true;
-  }).sort((a, b) => {
-    const dateComp = a.date.localeCompare(b.date);
-    if (dateComp !== 0) return dateComp;
-    return a.startTime.localeCompare(b.startTime);
-  });
+  // Filter schedules by selectedDate and priority
+  const filteredSchedules = schedules
+    .filter((item) => {
+      if (item.date !== selectedDate) return false;
+      if (priorityFilter !== 'all' && item.priority !== priorityFilter) return false;
+      return true;
+    })
+    .sort((a, b) => a.startTime.localeCompare(b.startTime));
 
   const priorityBadges = {
-    high: <Badge variant="danger">🔴 High</Badge>,
-    medium: <Badge variant="warning">🟡 Medium</Badge>,
-    low: <Badge variant="success">🟢 Low</Badge>,
+    high: <Badge variant="danger">High</Badge>,
+    medium: <Badge variant="warning">Medium</Badge>,
+    low: <Badge variant="cyan">Low</Badge>,
   };
 
   const categoryLabels: Record<string, string> = {
-    work: '💼 Kerja',
-    meeting: '👥 Meeting',
-    study: '📚 Belajar',
-    health: '🏃 Kesehatan',
-    personal: '✨ Personal',
-    other: '📦 Lainnya',
+    work: 'Kerja',
+    meeting: 'Meeting',
+    study: 'Belajar',
+    health: 'Kesehatan',
+    personal: 'Personal',
+    other: 'Lainnya',
   };
 
   return (
@@ -78,12 +61,12 @@ export default function SchedulePage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white tracking-tight flex items-center gap-2.5">
-            <CalendarIcon className="h-6 w-6 text-emerald-600 dark:text-emerald-400" />
+          <h1 className="text-xl sm:text-2xl font-black text-content-primaryLight dark:text-content-primaryDark tracking-tight flex items-center gap-2.5">
+            <CalendarIcon className="h-6 w-6 text-brand-primary dark:text-brand-vibrant" />
             <span>Jadwal & Agenda Planner</span>
           </h1>
-          <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1">
-            Rencanakan timeline aktivitas, pertemuan, dan alokasi waktu produktif.
+          <p className="text-xs sm:text-sm text-content-mutedLight dark:text-content-mutedDark mt-1">
+            Rencanakan timeline aktivitas, alokasi waktu, dan pertemuan penting.
           </p>
         </div>
 
@@ -92,44 +75,32 @@ export default function SchedulePage() {
             setEditingItem(null);
             setModalOpen(true);
           }}
-          className="shadow-md shadow-emerald-600/20"
+          className="shadow-glow"
         >
           <Plus className="h-4 w-4" />
           <span>Tambah Agenda</span>
         </Button>
       </div>
 
-      {/* Filter Tabs */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-        {/* Date Filters */}
-        <div className="flex gap-2 overflow-x-auto pb-1 no-scrollbar">
-          {[
-            { id: 'today', label: 'Hari Ini' },
-            { id: 'tomorrow', label: 'Besok' },
-            { id: 'week', label: '7 Hari ke Depan' },
-            { id: 'all', label: 'Semua Jadwal' },
-          ].map((tab) => (
-            <button
-              key={tab.id}
-              onClick={() => setDateFilter(tab.id as typeof dateFilter)}
-              className={`px-4 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition-all ${
-                dateFilter === tab.id
-                  ? 'bg-emerald-600 text-white shadow-sm shadow-emerald-600/20'
-                  : 'bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-50'
-              }`}
-            >
-              {tab.label}
-            </button>
-          ))}
+      {/* Horizontal 7-Day Date Strip */}
+      <HorizontalDateStrip
+        selectedDate={selectedDate}
+        onSelectDate={(newDate) => setSelectedDate(newDate)}
+      />
+
+      {/* Filter and Overview Bar */}
+      <div className="flex items-center justify-between gap-3 p-4 rounded-3xl bg-surface-light dark:bg-surface-dark border border-slate-100 dark:border-white/5 shadow-soft">
+        <div className="flex items-center gap-2 text-xs font-bold text-content-primaryLight dark:text-content-primaryDark">
+          <span>Agenda Terjadwal:</span>
+          <span className="text-brand-primary dark:text-brand-vibrant font-mono">{filteredSchedules.length}</span>
         </div>
 
-        {/* Priority Filter */}
         <div className="flex items-center gap-2">
-          <Filter className="h-3.5 w-3.5 text-slate-400" />
+          <Filter className="h-3.5 w-3.5 text-content-mutedLight dark:text-content-mutedDark" />
           <select
             value={priorityFilter}
             onChange={(e) => setPriorityFilter(e.target.value)}
-            className="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-3 py-1.5 text-xs text-slate-700 dark:text-slate-200 font-medium focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
+            className="rounded-2xl border border-slate-200 dark:border-white/10 bg-app-light dark:bg-app-dark/70 px-3 py-1.5 text-xs text-content-primaryLight dark:text-content-primaryDark font-medium focus:outline-none focus:ring-2 focus:ring-brand-primary/20"
           >
             <option value="all">Semua Prioritas</option>
             <option value="high">High Priority</option>
@@ -143,12 +114,8 @@ export default function SchedulePage() {
       {filteredSchedules.length === 0 ? (
         <EmptyState
           icon={<CalendarIcon className="h-8 w-8" />}
-          title="Tidak Ada Agenda yang Sesuai"
-          description={
-            dateFilter === 'today'
-              ? 'Agenda untuk hari ini belum ada. Tambahkan aktivitas baru Anda.'
-              : 'Tidak ditemukan jadwal untuk filter ini. Silakan buat agenda baru.'
-          }
+          title="Tidak Ada Agenda di Tanggal Ini"
+          description="Timeline jadwal Anda masih kosong untuk hari yang dipilih. Tambahkan agenda untuk memulai."
           actionLabel="Tambah Agenda Baru"
           onAction={() => {
             setEditingItem(null);
@@ -160,96 +127,101 @@ export default function SchedulePage() {
           {filteredSchedules.map((item) => (
             <div
               key={item.id}
-              className={`p-4 sm:p-5 rounded-2xl border transition-all duration-150 flex flex-col sm:flex-row sm:items-center justify-between gap-4 ${
-                item.completed
-                  ? 'bg-slate-50/70 dark:bg-slate-900/40 border-slate-200/50 opacity-60'
-                  : 'bg-white dark:bg-slate-900 border-slate-200/80 dark:border-slate-800 shadow-sm hover:border-slate-300 dark:hover:border-slate-700'
+              className={`p-4 sm:p-5 rounded-3xl bg-surface-light dark:bg-surface-dark border border-slate-100 dark:border-white/5 shadow-soft transition-all duration-150 flex items-center justify-between gap-4 ${
+                item.completed ? 'opacity-50' : 'opacity-100'
               }`}
             >
-              {/* Left Details */}
-              <div className="flex items-start gap-3.5 flex-1 min-w-0">
-                <button
-                  type="button"
-                  onClick={() => toggleScheduleComplete(item.id)}
-                  className="mt-0.5 flex-shrink-0 transition-transform active:scale-90 focus:outline-none"
-                >
-                  {item.completed ? (
-                    <CheckCircle2 className="h-5 w-5 text-emerald-600 dark:text-emerald-400 fill-emerald-100 dark:fill-emerald-950" />
-                  ) : (
-                    <Circle className="h-5 w-5 text-slate-300 dark:text-slate-600 hover:text-emerald-500" />
-                  )}
-                </button>
+              {/* Left Time Column */}
+              <div className="w-16 sm:w-20 flex-shrink-0 text-left sm:text-right">
+                <span className="font-mono text-xs sm:text-sm font-black text-content-primaryLight dark:text-content-primaryDark">
+                  {item.startTime}
+                </span>
+                <p className="font-mono text-[10px] text-content-mutedLight dark:text-content-mutedDark">
+                  {item.endTime}
+                </p>
+              </div>
 
-                <div className="space-y-1.5 min-w-0">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <h3
-                      className={`text-sm font-bold truncate ${
-                        item.completed
-                          ? 'line-through text-slate-400 dark:text-slate-500'
-                          : 'text-slate-900 dark:text-white'
-                      }`}
-                    >
-                      {item.title}
-                    </h3>
-                    <div className="flex items-center gap-1.5">
+              {/* Center Dot Indicator */}
+              <div className="hidden sm:flex flex-col items-center self-stretch justify-center">
+                <div className="h-2.5 w-2.5 rounded-full bg-brand-cyan shadow-glow flex-shrink-0" />
+                <div className="w-0.5 flex-1 bg-slate-200 dark:bg-slate-800 my-1" />
+              </div>
+
+              {/* Task Pill Container */}
+              <div className="flex-1 p-3.5 sm:p-4 rounded-2xl bg-surface-lightPill dark:bg-surface-darkPill flex flex-col sm:flex-row sm:items-center justify-between gap-3 min-w-0">
+                <div className="flex items-start sm:items-center gap-3 min-w-0">
+                  <button
+                    type="button"
+                    onClick={() => toggleScheduleComplete(item.id)}
+                    className="mt-0.5 sm:mt-0 flex-shrink-0 transition-transform active:scale-90 focus:outline-none"
+                  >
+                    {item.completed ? (
+                      <CheckCircle2 className="h-5 w-5 text-emerald-500" />
+                    ) : (
+                      <Circle className="h-5 w-5 text-content-mutedLight dark:text-content-mutedDark hover:text-brand-primary" />
+                    )}
+                  </button>
+
+                  <div className="min-w-0 space-y-1">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <h3
+                        className={`text-xs sm:text-sm font-bold truncate ${
+                          item.completed
+                            ? 'line-through text-content-mutedLight dark:text-content-mutedDark'
+                            : 'text-content-primaryLight dark:text-content-primaryDark'
+                        }`}
+                      >
+                        {item.title}
+                      </h3>
                       <Badge variant="default" size="sm">
                         {categoryLabels[item.category] || item.category}
                       </Badge>
                       {priorityBadges[item.priority]}
                     </div>
-                  </div>
 
-                  {item.description && (
-                    <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
-                      {item.description}
-                    </p>
-                  )}
+                    {item.description && (
+                      <p className="text-xs text-content-mutedLight dark:text-content-mutedDark leading-relaxed">
+                        {item.description}
+                      </p>
+                    )}
 
-                  <div className="flex flex-wrap items-center gap-4 text-xs text-slate-500 dark:text-slate-400 pt-0.5">
-                    <span className="flex items-center gap-1.5 font-medium">
-                      <CalendarIcon className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400" />
-                      {formatShortDate(item.date)}
-                    </span>
-                    <span className="flex items-center gap-1.5 font-mono font-semibold text-slate-700 dark:text-slate-300">
-                      <Clock className="h-3.5 w-3.5 text-blue-500" />
-                      {item.startTime} - {item.endTime}
-                    </span>
                     {item.locationOrLink && (
-                      <span className="flex items-center gap-1.5 text-emerald-600 dark:text-emerald-400">
+                      <div className="text-[11px] text-brand-primary dark:text-brand-vibrant flex items-center gap-1">
                         <MapPin className="h-3.5 w-3.5" />
                         {item.locationOrLink.startsWith('http') ? (
                           <a
                             href={item.locationOrLink}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="hover:underline flex items-center gap-1"
+                            className="hover:underline flex items-center gap-1 font-bold"
                           >
-                            Link Pertemuan <ExternalLink className="h-3 w-3" />
+                            <span>Link Meeting</span>
+                            <ExternalLink className="h-3 w-3" />
                           </a>
                         ) : (
-                          item.locationOrLink
+                          <span>{item.locationOrLink}</span>
                         )}
-                      </span>
+                      </div>
                     )}
                   </div>
                 </div>
               </div>
 
-              {/* Right Action buttons */}
-              <div className="flex items-center gap-1.5 self-end sm:self-center flex-shrink-0">
+              {/* Action Buttons */}
+              <div className="flex items-center gap-1.5 flex-shrink-0">
                 <button
                   onClick={() => {
                     setEditingItem(item);
                     setModalOpen(true);
                   }}
-                  className="p-2 rounded-xl text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+                  className="p-2 rounded-xl text-content-mutedLight dark:text-content-mutedDark hover:text-brand-primary dark:hover:text-brand-vibrant hover:bg-surface-lightPill dark:hover:bg-surface-darkPill transition-colors"
                   title="Edit Agenda"
                 >
                   <Edit2 className="h-4 w-4" />
                 </button>
                 <button
                   onClick={() => setDeleteTargetId(item.id)}
-                  className="p-2 rounded-xl text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition-colors"
+                  className="p-2 rounded-xl text-content-mutedLight dark:text-content-mutedDark hover:text-rose-500 hover:bg-rose-500/10 transition-colors"
                   title="Hapus Agenda"
                 >
                   <Trash2 className="h-4 w-4" />

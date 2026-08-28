@@ -4,8 +4,8 @@ import React, { useState, useEffect } from 'react';
 import { Modal } from '@/components/ui/Modal';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
-import { Textarea } from '@/components/ui/Textarea';
 import { Select } from '@/components/ui/Select';
+import { Textarea } from '@/components/ui/Textarea';
 import { ScheduleItem, ScheduleCategory, Priority } from '@/lib/types';
 import { useApp } from '@/context/AppContext';
 import { getLocalDateString } from '@/lib/utils';
@@ -25,8 +25,8 @@ export function ScheduleModal({ isOpen, onClose, initialData }: ScheduleModalPro
   const [endTime, setEndTime] = useState('10:00');
   const [category, setCategory] = useState<ScheduleCategory>('work');
   const [priority, setPriority] = useState<Priority>('medium');
-  const [locationOrLink, setLocationOrLink] = useState('');
   const [description, setDescription] = useState('');
+  const [locationOrLink, setLocationOrLink] = useState('');
 
   useEffect(() => {
     if (initialData) {
@@ -36,8 +36,8 @@ export function ScheduleModal({ isOpen, onClose, initialData }: ScheduleModalPro
       setEndTime(initialData.endTime);
       setCategory(initialData.category);
       setPriority(initialData.priority);
-      setLocationOrLink(initialData.locationOrLink || '');
       setDescription(initialData.description || '');
+      setLocationOrLink(initialData.locationOrLink || '');
     } else {
       setTitle('');
       setDate(getLocalDateString());
@@ -45,8 +45,8 @@ export function ScheduleModal({ isOpen, onClose, initialData }: ScheduleModalPro
       setEndTime('10:00');
       setCategory('work');
       setPriority('medium');
-      setLocationOrLink('');
       setDescription('');
+      setLocationOrLink('');
     }
   }, [initialData, isOpen]);
 
@@ -62,8 +62,8 @@ export function ScheduleModal({ isOpen, onClose, initialData }: ScheduleModalPro
         endTime,
         category,
         priority,
-        locationOrLink: locationOrLink.trim() || undefined,
         description: description.trim() || undefined,
+        locationOrLink: locationOrLink.trim() || undefined,
       });
     } else {
       addSchedule({
@@ -73,8 +73,8 @@ export function ScheduleModal({ isOpen, onClose, initialData }: ScheduleModalPro
         endTime,
         category,
         priority,
-        locationOrLink: locationOrLink.trim() || undefined,
         description: description.trim() || undefined,
+        locationOrLink: locationOrLink.trim() || undefined,
       });
     }
     onClose();
@@ -84,14 +84,14 @@ export function ScheduleModal({ isOpen, onClose, initialData }: ScheduleModalPro
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      title={initialData ? 'Edit Agenda / Jadwal' : 'Tambah Agenda Baru'}
-      description="Jadwalkan aktivitas penting dengan alokasi waktu dan skala prioritas."
+      title={initialData ? 'Edit Agenda' : 'Tambah Agenda Baru'}
+      description="Rencanakan aktivitas harian, alokasi waktu, dan jadwal pertemuan."
       maxWidth="lg"
     >
       <form onSubmit={handleSubmit} className="space-y-4">
         <Input
-          label="Nama Aktivitas / Kegiatan"
-          placeholder="Contoh: Sprint Planning, Sesi Belajar Algoritma"
+          label="Nama Aktivitas / Agenda"
+          placeholder="Contoh: Meeting Proyek, Review Laporan"
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           required
@@ -108,14 +108,14 @@ export function ScheduleModal({ isOpen, onClose, initialData }: ScheduleModalPro
           />
           <Input
             type="time"
-            label="Waktu Mulai"
+            label="Jam Mulai"
             value={startTime}
             onChange={(e) => setStartTime(e.target.value)}
             required
           />
           <Input
             type="time"
-            label="Waktu Selesai"
+            label="Jam Selesai"
             value={endTime}
             onChange={(e) => setEndTime(e.target.value)}
             required
@@ -128,12 +128,12 @@ export function ScheduleModal({ isOpen, onClose, initialData }: ScheduleModalPro
             value={category}
             onChange={(e) => setCategory(e.target.value as ScheduleCategory)}
           >
-            <option value="work">💼 Pekerjaan & Tugas</option>
-            <option value="meeting">👥 Meeting & Diskusi</option>
-            <option value="study">📚 Belajar & Kuliah</option>
-            <option value="health">🏃 Kesehatan & Olahraga</option>
-            <option value="personal">✨ Personal</option>
-            <option value="other">📦 Lainnya</option>
+            <option value="work">Kerja / Tugas</option>
+            <option value="meeting">Meeting / Diskusi</option>
+            <option value="study">Belajar / Kuliah</option>
+            <option value="health">Kesehatan & Olahraga</option>
+            <option value="personal">Personal</option>
+            <option value="other">Lainnya</option>
           </Select>
 
           <Select
@@ -141,22 +141,22 @@ export function ScheduleModal({ isOpen, onClose, initialData }: ScheduleModalPro
             value={priority}
             onChange={(e) => setPriority(e.target.value as Priority)}
           >
-            <option value="high">🔴 Tinggi (High Priority)</option>
-            <option value="medium">🟡 Sedang (Medium Priority)</option>
-            <option value="low">🟢 Rendah (Low Priority)</option>
+            <option value="high">High Priority</option>
+            <option value="medium">Medium Priority</option>
+            <option value="low">Low Priority</option>
           </Select>
         </div>
 
         <Input
-          label="Lokasi / Link Pertemuan (Opsional)"
-          placeholder="Contoh: Zoom, Google Meet, Ruang Meeting A"
+          label="Lokasi atau Tautan Pertemuan (Opsional)"
+          placeholder="Contoh: Ruang Rapat A, atau https://meet.google.com/..."
           value={locationOrLink}
           onChange={(e) => setLocationOrLink(e.target.value)}
         />
 
         <Textarea
-          label="Catatan Tambahan (Opsional)"
-          placeholder="Rincian agenda atau persiapan yang diperlukan..."
+          label="Deskripsi / Catatan Tambahan (Opsional)"
+          placeholder="Tuliskan detail agenda atau poin pembahasan..."
           rows={3}
           value={description}
           onChange={(e) => setDescription(e.target.value)}
@@ -166,8 +166,8 @@ export function ScheduleModal({ isOpen, onClose, initialData }: ScheduleModalPro
           <Button variant="outline" size="sm" onClick={onClose}>
             Batal
           </Button>
-          <Button type="submit" size="sm">
-            {initialData ? 'Simpan Perubahan' : 'Jadwalkan Agenda'}
+          <Button type="submit" size="sm" className="shadow-glow">
+            {initialData ? 'Simpan Perubahan' : 'Tambah Agenda'}
           </Button>
         </div>
       </form>

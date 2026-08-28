@@ -51,8 +51,8 @@ export function GoalModal({ isOpen, onClose, initialData }: GoalModalProps) {
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      title={initialData ? 'Edit Daily Goal' : 'Tambah Daily Goal Baru'}
-      description="Tentukan kebiasaan harian atau target yang ingin kamu selesaikan secara konsisten."
+      title={initialData ? 'Edit Target Harian' : 'Tambah Target Harian'}
+      description="Tentukan kebiasaan harian atau target yang ingin Anda selesaikan secara konsisten."
     >
       <form onSubmit={handleSubmit} className="space-y-4">
         <Input
@@ -69,19 +69,19 @@ export function GoalModal({ isOpen, onClose, initialData }: GoalModalProps) {
           value={category}
           onChange={(e) => setCategory(e.target.value as GoalCategory)}
         >
-          <option value="career">💼 Karir & Profesional</option>
-          <option value="learning">📚 Belajar & Skill</option>
-          <option value="health">🏃 Kesehatan & Kebugaran</option>
-          <option value="finance">💰 Finansial & Investasi</option>
-          <option value="personal">✨ Personal & Hobi</option>
-          <option value="general">🎯 Umum</option>
+          <option value="career">Karir & Profesional</option>
+          <option value="learning">Belajar & Skill</option>
+          <option value="health">Kesehatan & Kebugaran</option>
+          <option value="finance">Finansial & Investasi</option>
+          <option value="personal">Personal & Hobi</option>
+          <option value="general">Umum</option>
         </Select>
 
         <div className="flex justify-end gap-2.5 pt-3">
           <Button variant="outline" size="sm" onClick={onClose}>
             Batal
           </Button>
-          <Button type="submit" size="sm">
+          <Button type="submit" size="sm" className="shadow-glow">
             {initialData ? 'Simpan Perubahan' : 'Tambah Target'}
           </Button>
         </div>

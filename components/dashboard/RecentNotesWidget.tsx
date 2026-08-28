@@ -18,22 +18,26 @@ export function RecentNotesWidget() {
   });
 
   return (
-    <div className="flex flex-col p-6 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-sm">
+    <div className="flex flex-col p-6 rounded-3xl bg-surface-light dark:bg-surface-dark border border-slate-100 dark:border-white/5 shadow-soft">
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2.5">
-          <div className="p-2 rounded-xl bg-amber-50 dark:bg-amber-950/40 text-amber-600 dark:text-amber-400">
+          <div className="p-2 rounded-2xl bg-surface-lightPill dark:bg-surface-darkPill text-brand-cyan">
             <FileText className="h-5 w-5" />
           </div>
           <div>
-            <h3 className="text-sm font-bold text-slate-900 dark:text-white">Catatan & Ide Cepat</h3>
-            <p className="text-xs text-slate-400">Knowledge base dan draft ide</p>
+            <h3 className="text-sm font-bold text-content-primaryLight dark:text-content-primaryDark">
+              Catatan & Ide Cepat
+            </h3>
+            <p className="text-xs text-content-mutedLight dark:text-content-mutedDark">
+              {notes.length} catatan tersimpan
+            </p>
           </div>
         </div>
 
         <Link
           href="/notes"
-          className="inline-flex items-center gap-1 text-xs font-semibold text-emerald-600 dark:text-emerald-400 hover:underline"
+          className="inline-flex items-center gap-1 text-xs font-bold text-brand-primary dark:text-brand-vibrant hover:underline"
         >
           <span>Buka Notes</span>
           <ArrowRight className="h-3.5 w-3.5" />
@@ -47,7 +51,7 @@ export function RecentNotesWidget() {
           description="Tulis ide cepat, catatan ringkasan, atau referensi penting Anda."
           actionLabel="Tulis Catatan"
           onAction={() => openQuickAction('note')}
-          className="py-6"
+          className="py-6 border-0 bg-transparent"
         />
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 flex-1">
@@ -55,24 +59,24 @@ export function RecentNotesWidget() {
             <Link
               key={note.id}
               href="/notes"
-              className="p-3.5 rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/40 hover:border-slate-300 dark:hover:border-slate-700 transition-all flex flex-col justify-between"
+              className="p-4 rounded-2xl bg-surface-lightPill dark:bg-surface-darkPill hover:bg-slate-200 dark:hover:bg-slate-700/50 transition-all flex flex-col justify-between"
             >
               <div>
                 <div className="flex items-start justify-between gap-1 mb-1">
-                  <h4 className="text-xs font-bold text-slate-900 dark:text-white line-clamp-1">
+                  <h4 className="text-xs font-bold text-content-primaryLight dark:text-content-primaryDark line-clamp-1">
                     {note.title}
                   </h4>
                   {note.isPinned && (
-                    <Pin className="h-3.5 w-3.5 text-amber-500 fill-amber-500 flex-shrink-0" />
+                    <Pin className="h-3.5 w-3.5 text-amber-400 fill-amber-400 flex-shrink-0" />
                   )}
                 </div>
-                <p className="text-xs text-slate-500 dark:text-slate-400 line-clamp-2 leading-relaxed">
+                <p className="text-xs text-content-mutedLight dark:text-content-mutedDark line-clamp-2 leading-relaxed">
                   {note.content}
                 </p>
               </div>
 
-              <div className="flex items-center justify-between mt-3 pt-2 border-t border-slate-200/60 dark:border-slate-800 text-[10px] text-slate-400">
-                <Badge variant="amber" size="sm">
+              <div className="flex items-center justify-between mt-3 pt-2 border-t border-slate-200/40 dark:border-white/5 text-[10px] text-content-mutedLight dark:text-content-mutedDark">
+                <Badge variant="cyan" size="sm">
                   {note.category}
                 </Badge>
                 <span>{formatShortDate(note.updatedAt.slice(0, 10))}</span>

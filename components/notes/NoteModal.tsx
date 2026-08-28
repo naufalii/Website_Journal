@@ -4,8 +4,8 @@ import React, { useState, useEffect } from 'react';
 import { Modal } from '@/components/ui/Modal';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
-import { Textarea } from '@/components/ui/Textarea';
 import { Select } from '@/components/ui/Select';
+import { Textarea } from '@/components/ui/Textarea';
 import { Note, NoteCategory } from '@/lib/types';
 import { useApp } from '@/context/AppContext';
 
@@ -29,7 +29,7 @@ export function NoteModal({ isOpen, onClose, initialData }: NoteModalProps) {
       setTitle(initialData.title);
       setContent(initialData.content);
       setCategory(initialData.category);
-      setTags(initialData.tags ? initialData.tags.join(', ') : '');
+      setTags(initialData.tags.join(', '));
       setIsPinned(initialData.isPinned);
     } else {
       setTitle('');
@@ -45,11 +45,9 @@ export function NoteModal({ isOpen, onClose, initialData }: NoteModalProps) {
     if (!title.trim()) return;
 
     const tagsArray = tags
-      ? tags
-          .split(',')
-          .map((t) => t.trim())
-          .filter(Boolean)
-      : [];
+      .split(',')
+      .map((t) => t.trim())
+      .filter(Boolean);
 
     if (initialData) {
       updateNote(initialData.id, {
@@ -75,14 +73,14 @@ export function NoteModal({ isOpen, onClose, initialData }: NoteModalProps) {
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      title={initialData ? 'Edit Catatan' : 'Tulis Catatan Cepat'}
-      description="Simpan ide, draft, atau ringkasan materi penting."
+      title={initialData ? 'Edit Catatan' : 'Tulis Catatan Baru'}
+      description="Simpan ide, materi belajar, atau ringkasan penting."
       maxWidth="lg"
     >
       <form onSubmit={handleSubmit} className="space-y-4">
         <Input
           label="Judul Catatan"
-          placeholder="Contoh: Rangkuman Clean Architecture, Daftar Ide Startup"
+          placeholder="Contoh: Arsitektur Next.js, Ringkasan Buku"
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           required
@@ -100,12 +98,12 @@ export function NoteModal({ isOpen, onClose, initialData }: NoteModalProps) {
             <option value="project">🚀 Proyek & Rencana</option>
             <option value="work">💼 Pekerjaan</option>
             <option value="personal">🔒 Personal</option>
-            <option value="general">📝 Catatan Umum</option>
+            <option value="general">📝 Umum</option>
           </Select>
 
           <Input
             label="Tags (Pisahkan koma)"
-            placeholder="nextjs, tips, database"
+            placeholder="react, tailwind, ui"
             value={tags}
             onChange={(e) => setTags(e.target.value)}
           />
@@ -113,28 +111,30 @@ export function NoteModal({ isOpen, onClose, initialData }: NoteModalProps) {
 
         <Textarea
           label="Isi Catatan"
-          placeholder="Tuliskan detail catatan di sini..."
-          rows={7}
+          placeholder="Tuliskan isi catatan, poin penting, atau draf ide..."
+          rows={6}
           value={content}
           onChange={(e) => setContent(e.target.value)}
-          required
         />
 
-        <label className="flex items-center gap-2 text-xs font-semibold text-slate-700 dark:text-slate-300 cursor-pointer select-none">
+        <div className="flex items-center gap-2 pt-1">
           <input
             type="checkbox"
+            id="isPinned"
             checked={isPinned}
             onChange={(e) => setIsPinned(e.target.checked)}
-            className="rounded border-slate-300 text-emerald-600 focus:ring-emerald-500 h-4 w-4"
+            className="h-4 w-4 rounded border-slate-300 text-brand-primary focus:ring-brand-primary"
           />
-          <span>Pin Catatan ini ke Bagian Teratas 📌</span>
-        </label>
+          <label htmlFor="isPinned" className="text-xs font-bold text-content-primaryLight dark:text-content-primaryDark cursor-pointer">
+            📌 Sematkan catatan ini di posisi teratas
+          </label>
+        </div>
 
         <div className="flex justify-end gap-2.5 pt-3">
           <Button variant="outline" size="sm" onClick={onClose}>
             Batal
           </Button>
-          <Button type="submit" size="sm">
+          <Button type="submit" size="sm" className="shadow-glow">
             {initialData ? 'Simpan Perubahan' : 'Simpan Catatan'}
           </Button>
         </div>

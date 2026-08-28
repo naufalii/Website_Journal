@@ -5,8 +5,9 @@ import { Modal } from '@/components/ui/Modal';
 import { Button } from '@/components/ui/Button';
 import { VaultItem } from '@/lib/types';
 import { getFileFromVault } from '@/lib/storage';
-import { Download, FileText, AlertCircle, ExternalLink } from 'lucide-react';
-import { formatBytes } from '@/lib/utils';
+import { formatBytes, formatShortDate } from '@/lib/utils';
+import { Download, FileText, Image as ImageIcon, ExternalLink, Loader2 } from 'lucide-react';
+import { Badge } from '@/components/ui/Badge';
 
 interface FilePreviewModalProps {
   item: VaultItem | null;
@@ -15,154 +16,155 @@ interface FilePreviewModalProps {
 }
 
 export function FilePreviewModal({ item, isOpen, onClose }: FilePreviewModalProps) {
-  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
-  const [fileType, setFileType] = useState<string>('');
-  const [loading, setLoading] = useState(true);
+  const [fileUrl, setFileUrl] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    let currentObjectUrl: string | null = null;
+    let activeUrl: string | null = null;
 
-    async function load() {
-      if (!item || !isOpen) {
-        setPreviewUrl(null);
+    const loadFile = async () => {
+      if (!item || item.type !== 'file') return;
+
+      // If item has a cloud public URL (Supabase Storage), use it directly
+      if (item.url && item.url.startsWith('http')) {
+        setFileUrl(item.url);
         return;
       }
 
       setLoading(true);
-
-      // If item has a cloud URL from Supabase Storage
-      if (item.url && item.url.startsWith('http')) {
-        setPreviewUrl(item.url);
-        setFileType(item.fileType || '');
-        setLoading(false);
-        return;
-      }
-
-      // If item is in local IndexedDB
-      if (item.fileId) {
-        try {
+      try {
+        if (item.fileId) {
           const stored = await getFileFromVault(item.fileId);
           if (stored && stored.data) {
-            const blob =
-              stored.data instanceof Blob
-                ? stored.data
-                : new Blob([stored.data], { type: stored.type });
-            currentObjectUrl = URL.createObjectURL(blob);
-            setPreviewUrl(currentObjectUrl);
-            setFileType(stored.type || '');
-          } else {
-            setPreviewUrl(null);
+            const blob = stored.data instanceof Blob ? stored.data : new Blob([stored.data], { type: stored.type });
+            activeUrl = URL.createObjectURL(blob);
+            setFileUrl(activeUrl);
           }
-        } catch (err) {
-          console.error('Error loading preview file from IndexedDB:', err);
-          setPreviewUrl(null);
-        } finally {
-          setLoading(false);
         }
-        return;
+      } catch (err) {
+        console.error('Failed to load file from storage:', err);
+      } finally {
+        setLoading(false);
       }
+    };
 
-      setLoading(false);
+    if (isOpen && item) {
+      loadFile();
+    } else {
+      setFileUrl(null);
     }
 
-    load();
-
     return () => {
-      if (currentObjectUrl) {
-        URL.revokeObjectURL(currentObjectUrl);
+      if (activeUrl) {
+        URL.revokeObjectURL(activeUrl);
       }
     };
   }, [item, isOpen]);
 
   if (!item) return null;
 
+  const isImage = item.fileType?.startsWith('image/');
+  const isPdf = item.fileType === 'application/pdf';
+
   const handleDownload = () => {
-    if (!previewUrl) return;
+    if (!fileUrl && !item.url) return;
+    const downloadUrl = fileUrl || item.url;
+    if (!downloadUrl) return;
+
     const a = document.createElement('a');
-    a.href = previewUrl;
-    a.download = item.fileName || item.title || 'download';
-    a.target = '_blank';
+    a.href = downloadUrl;
+    a.download = item.fileName || item.title;
+    if (downloadUrl.startsWith('http')) {
+      a.target = '_blank';
+    }
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
   };
-
-  const isImage =
-    fileType.startsWith('image/') ||
-    Boolean(item.fileName?.match(/\.(jpeg|jpg|gif|png|webp|svg)$/i));
-
-  const isPdf =
-    fileType.includes('pdf') ||
-    Boolean(item.fileName?.toLowerCase().endsWith('.pdf'));
 
   return (
     <Modal
       isOpen={isOpen}
       onClose={onClose}
       title={item.title}
-      description={`Berkas: ${item.fileName || '-'} • Ukuran: ${formatBytes(item.fileSize)}`}
-      maxWidth="2xl"
+      description={`Tipe: ${item.fileType || 'Berkas'} | Ukuran: ${formatBytes(item.fileSize)}`}
+      maxWidth="lg"
     >
       <div className="space-y-4">
-        {loading ? (
-          <div className="py-16 text-center text-xs text-slate-500">
-            Memuat file preview...
-          </div>
-        ) : !previewUrl ? (
-          <div className="py-12 flex flex-col items-center justify-center text-center text-rose-500 gap-2">
-            <AlertCircle className="h-8 w-8" />
-            <p className="text-sm font-semibold">File tidak dapat dimuat atau tidak ditemukan.</p>
-          </div>
-        ) : (
-          <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 overflow-hidden flex items-center justify-center min-h-[300px] max-h-[500px]">
-            {isImage ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                src={previewUrl}
-                alt={item.title}
-                className="max-h-[450px] w-auto object-contain rounded-lg p-2"
-              />
-            ) : isPdf ? (
-              <iframe
-                src={previewUrl}
-                className="w-full h-[450px] border-0"
-                title={item.title}
-              />
-            ) : (
-              <div className="flex flex-col items-center justify-center p-8 text-center text-slate-500">
-                <FileText className="h-16 w-16 text-emerald-600 mb-3" />
-                <p className="text-sm font-medium text-slate-700 dark:text-slate-300">
-                  Preview langsung tidak tersedia untuk format file ini ({fileType || 'dokumen'}).
-                </p>
-                <p className="text-xs text-slate-400 mt-1">
-                  Silakan unduh atau buka berkas melalui tombol di bawah.
-                </p>
+        {/* Preview Area */}
+        <div className="min-h-[220px] max-h-[420px] rounded-3xl bg-app-light dark:bg-app-dark/70 border border-slate-200 dark:border-white/10 flex items-center justify-center overflow-hidden p-4 relative">
+          {loading ? (
+            <div className="flex flex-col items-center gap-2 text-content-mutedLight dark:text-content-mutedDark">
+              <Loader2 className="h-7 w-7 animate-spin text-brand-primary dark:text-brand-vibrant" />
+              <p className="text-xs font-bold">Memuat berkas...</p>
+            </div>
+          ) : isImage && fileUrl ? (
+            <img
+              src={fileUrl}
+              alt={item.title}
+              className="max-h-[380px] max-w-full object-contain rounded-2xl shadow-sm"
+            />
+          ) : isPdf && fileUrl ? (
+            <div className="text-center space-y-3">
+              <div className="h-16 w-16 rounded-3xl bg-brand-primary/10 text-brand-primary dark:text-brand-vibrant flex items-center justify-center mx-auto shadow-soft">
+                <FileText className="h-8 w-8" />
               </div>
-            )}
-          </div>
-        )}
+              <p className="text-xs font-bold text-content-primaryLight dark:text-content-primaryDark max-w-xs truncate mx-auto">
+                {item.fileName}
+              </p>
+              <a
+                href={fileUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-2xl bg-brand-primary text-white text-xs font-bold shadow-soft hover:shadow-glow transition-all"
+              >
+                <span>Buka PDF di Tab Baru</span>
+                <ExternalLink className="h-3.5 w-3.5" />
+              </a>
+            </div>
+          ) : (
+            <div className="text-center space-y-2">
+              <div className="h-16 w-16 rounded-3xl bg-brand-cyan/10 text-brand-cyan flex items-center justify-center mx-auto shadow-soft">
+                <FileText className="h-8 w-8" />
+              </div>
+              <p className="text-xs font-bold text-content-primaryLight dark:text-content-primaryDark">{item.fileName}</p>
+              <p className="text-[11px] text-content-mutedLight dark:text-content-mutedDark">
+                Pratinjau langsung tidak tersedia untuk format berkas ini.
+              </p>
+            </div>
+          )}
+        </div>
 
-        <div className="flex items-center justify-between pt-3 border-t border-slate-100 dark:border-slate-800">
+        {/* File Meta Breakdown */}
+        <div className="p-4 rounded-2xl bg-surface-lightPill dark:bg-surface-darkPill flex items-center justify-between text-xs">
+          <div className="space-y-0.5">
+            <p className="text-[11px] text-content-mutedLight dark:text-content-mutedDark font-bold">Kategori</p>
+            <Badge variant="primary" size="sm">
+              {item.category}
+            </Badge>
+          </div>
+          <div className="text-right space-y-0.5">
+            <p className="text-[11px] text-content-mutedLight dark:text-content-mutedDark font-bold">Diunggah</p>
+            <p className="font-mono text-content-primaryLight dark:text-content-primaryDark font-bold">
+              {formatShortDate(item.createdAt.slice(0, 10))}
+            </p>
+          </div>
+        </div>
+
+        {/* Footer Actions */}
+        <div className="flex items-center justify-end gap-2.5 pt-2">
           <Button variant="outline" size="sm" onClick={onClose}>
             Tutup
           </Button>
-          {previewUrl && (
-            <div className="flex items-center gap-2">
-              <a
-                href={previewUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-100 transition-colors"
-              >
-                <span>Buka di Tab Baru</span>
-                <ExternalLink className="h-3.5 w-3.5" />
-              </a>
-              <Button size="sm" onClick={handleDownload} className="gap-2">
-                <Download className="h-4 w-4" />
-                <span>Unduh File</span>
-              </Button>
-            </div>
-          )}
+          <Button
+            size="sm"
+            onClick={handleDownload}
+            disabled={!fileUrl && !item.url}
+            className="gap-2 shadow-glow"
+          >
+            <Download className="h-4 w-4" />
+            <span>Unduh Berkas</span>
+          </Button>
         </div>
       </div>
     </Modal>
